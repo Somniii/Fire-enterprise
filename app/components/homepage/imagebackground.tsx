@@ -1,8 +1,10 @@
-export function imageBackground(){
+import bgImage from "../../assets/background1.jpg"
+
+export default function ImageBackground(){
     return(
         <>
-            <img className="aspect-3/2" src="assets/background1"/>
-            
+            <img className="fixed w-[1xs] h-[1xs] -z-10" src={bgImage.src}/>
         </>
+
     )
 }
