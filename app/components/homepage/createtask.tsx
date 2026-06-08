@@ -39,7 +39,7 @@ export default function CreateTask(){
                     </div>
                     {isRepeatExpanded && (
                         <div>
-                            <h1>peruano</h1>
+                            <h1>test</h1>
                         </div>
                     )}
                 </form>
