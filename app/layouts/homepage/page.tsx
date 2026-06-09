@@ -8,7 +8,6 @@ export default function homepage(){
             <UpBar/>
             <ImageBackground/>
             <div className="pt-16 flex min-h-screen">
-            {}
                <LeftBar/>
                <TaskBlock/>
 
