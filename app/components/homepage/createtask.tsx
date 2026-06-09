@@ -1,6 +1,7 @@
 "use client"
 import addSvg from "../../assets/icons/add.svg"
 import {useState} from "react"
+
 export default function CreateTask(){
     function something(){
 
@@ -12,13 +13,17 @@ export default function CreateTask(){
     function isClicked(){
         setIsExpanded(true)
     }
-    function isWeekChecked(){
-        setIsRepeatWeekExpanded(true)
-    }
 
     const [isExpanded, setIsExpanded] = useState(false)
-    const [isRepeatWeekExpanded, setIsRepeatWeekExpanded] = useState(false)
-    const [isRepeatMonthExpanded, setIsRepeatMonthExpanded] = useState(false)
+
+    const [repeatType , setRepeatType] =useState("")
+
+    function monthlyType(){
+        setRepeatType("month")
+    }
+    function weeklyType(){
+        setRepeatType("week")
+    }
 
     const DIAS_SEMANA = [
         { id: "domingo", nombre: "Domingo" },
@@ -50,7 +55,7 @@ export default function CreateTask(){
     if(isExpanded){
         return(
             <>
-            <div className= {`bg-white w-[66rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ${isRepeatWeekExpanded ? "h-[12rem] " :  isRepeatMonthExpanded ? "h-[15rem]" : "h-[5rem] " }`}>
+            <div className= {`bg-white w-[66rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ${repeatType==="week" ? "h-[12rem] " :  repeatType==="month" ? "h-[15rem]" : "h-[5rem] " }`}>
                 <form>
                     <div>
                         <input type="text" placeholder="Escribe el titulo de la tarea">
@@ -62,25 +67,23 @@ export default function CreateTask(){
                     </div> 
                     <div className="flex">
                         <div className="flex">
-                            <input type="checkbox"
-                                    id="repeatWeekly"
-                                    checked={isRepeatWeekExpanded}
-                                    onChange={(e)=>setIsRepeatWeekExpanded(e.target.checked)}
-                                    className="w-4 h-4 accent-orange-500"
+                            <input type="radio" 
+                            name="repeat"
+                            checked={repeatType=== "week"}
+                            onChange={weeklyType}
                             />
                             <p>Repeticion semanal</p>
                         </div>
                         <div className="flex">
-                            <input type="checkbox"
-                                    id="repeathMonthly"
-                                    checked={isRepeatMonthExpanded}
-                                    onChange={(e)=>setIsRepeatMonthExpanded(e.target.checked)}
-                                    className="w-4 h-4 accent-orange-500"
+                            <input type="radio" 
+                            name="repeat"
+                            checked={repeatType ==="month"}
+                            onChange={monthlyType}
                             />
                             <p>Repeticion mensual</p>
                         </div>
                     </div>
-                    {isRepeatWeekExpanded && (
+                    {repeatType==="week" && (
                         <div>
                             <div className="flex">
                                 <p>Cantidad dias</p> 
@@ -120,6 +123,11 @@ export default function CreateTask(){
                     </div>
 
                         
+                    )}
+                    {repeatType==="month" &&(
+                        <div>
+                            <p>hola</p>
+                        </div>
                     )}
                 </form>
 
