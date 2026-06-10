@@ -4,10 +4,10 @@ import { auth, db } from "./firebase"; // Importamos la instancia de la base de 
 
 // ítems que se pueden ganar 
 const RECOMPENSAS_MOCK = {
-  Comun: { name: 'Carbon', rarity: 'Comun', color: 'text-neutral-400' },
-  Raro: { name: 'Estrella', rarity: 'Raro', color: 'text-yellow-400' },
-  Epico: { name: 'Llama Eterna', rarity: 'Epico', color: 'text-orange-400' },
-  Legendario: { name: 'Fénix Legendario', rarity: 'Legendario', color: 'text-amber-500 animate-pulse' }
+  Comun: { name: 'Carbon', rarity: 'Comun', color: 'text-black-400', image: '/assets/images/carbon.png' },
+  Raro: { name: 'Fosforo', rarity: 'Raro', color: 'text-yellow-400', image: '/assets/images/fosforo.png' },
+  Epico: { name: 'Llama', rarity: 'Epico', color: 'text-orange-400', image: '/assets/images/llama.png' },
+  Legendario: { name: 'Fénix Legendario', rarity: 'Legendario', color: 'text-amber-500 animate-pulse', image: '/assets/images/fenix.png' }
 };
 
 //saber que usuario está logueado para mostrar sus monedas y validar que pueda tirar el gacha

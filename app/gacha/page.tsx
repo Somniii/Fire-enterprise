@@ -75,23 +75,31 @@ export default function GachaPage() {
 
         {/* El Contenedor del Sobre / Invocación */}
         <div className="w-full h-52 flex items-center justify-center relative">
-          {animando ? (
+        {animando ? (
             // Animación de carga mística mientras gira
             <div className="w-28 h-28 rounded-full border-4 border-t-orange-500 border-white/20 animate-spin"></div>
-          ) : premioObtenido ? (
-            // Tarjeta del premio revelado
-            <div className="p-6 bg-white/5 border border-white/10 rounded-2xl scale-105 transition-all duration-300 backdrop-blur-md shadow-lg">
-              <span className="text-xs uppercase font-bold tracking-widest text-white/40">¡Invocación Exitosa!</span>
-              <h2 className={`text-2xl font-black mt-2 ${premioObtenido.color}`}>{premioObtenido.name}</h2>
-              <p className="text-white/70 text-sm mt-1">Rareza: {premioObtenido.rarity}</p>
+        ) : premioObtenido ? (
+            // Tarjeta del premio revelado con su FOTO REAL
+            <div className="p-6 bg-white/5 border border-white/10 rounded-2xl scale-105 transition-all duration-300 backdrop-blur-md shadow-lg flex flex-col items-center justify-center">
+            
+            {/* 1. CLAVAMOS LA IMAGEN DEL PREMIO ACÁ */}
+            <img 
+                src={premioObtenido.image} 
+                alt={premioObtenido.name} 
+                className="w-20 h-20 object-contain mb-3 drop-shadow-[0_10px_10px_rgba(255,255,255,0.1)]"
+            />
+
+            <span className="text-[10px] uppercase font-bold tracking-widest text-white/40">¡Invocación Exitosa!</span>
+            <h2 className={`text-2xl font-black mt-1 ${premioObtenido.color}`}>{premioObtenido.name}</h2>
+            <p className="text-white/70 text-sm mt-0.5">Rareza: {premioObtenido.rarity}</p>
             </div>
-          ) : (
+        ) : (
             // Estado inicial: El sobre cerrado esperando ser abierto
             <div className="w-32 h-44 bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl flex flex-col items-center justify-center shadow-md hover:border-orange-500/50 transition-all duration-300 group cursor-pointer" onClick={manejarTirada}>
-              <span className="text-4xl group-hover:scale-110 transition-transform">✉️</span>
-              <span className="text-[10px] uppercase tracking-widest text-white/40 mt-3 font-semibold">Sobre Místico</span>
+            <span className="text-4xl group-hover:scale-110 transition-transform">✉️</span>
+            <span className="text-[10px] uppercase tracking-widest text-white/40 mt-3 font-semibold">Sobre Místico</span>
             </div>
-          )}
+        )}
         </div>
 
         {/* Botón de acción */}
