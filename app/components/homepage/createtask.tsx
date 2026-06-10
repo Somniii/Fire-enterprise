@@ -1,15 +1,12 @@
 "use client"
 import addSvg from "../../assets/icons/add.svg"
 import {useState} from "react"
-
+import MyCalendar from "./calendar"
 export default function CreateTask(){
     function something(){
 
     }
-    function writeTask(){
-        
-    }
-    
+ 
     function isClicked(){
         setIsExpanded(true)
     }
@@ -17,6 +14,11 @@ export default function CreateTask(){
     const [isExpanded, setIsExpanded] = useState(false)
 
     const [repeatType , setRepeatType] =useState("")
+
+    const [titulo, setTitulo] = useState("")
+    const [nota, setNota] = useState("")
+    const [diaDelMes, setDiaDelMes] = useState(1)
+    const [cantidadDiasSemana ,setCantidadDiasSemana ] = useState(1)
 
     function monthlyType(){
         setRepeatType("month")
@@ -44,25 +46,65 @@ export default function CreateTask(){
         sabado: false,
     })
 
-    const handleDiaChanfe = (id: keyof typeof diasSeleccionados) => {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault(); // Evita que la página se recargue
+
+        // Creamos el objeto final con toda la información
+        const nuevaTarea = {
+            titulo,
+            nota,
+            tipoRepeticion: repeatType,
+            // Si es semanal, guardamos los días checkeados y la cantidad
+            detallesSemanal: repeatType === "week" ? {
+                cantidadDias: cantidadDiasSemana,
+                dias: Object.keys(diasSeleccionados).filter(key => diasSeleccionados[key as keyof typeof diasSeleccionados])
+            } : null,
+            // Si es mensual, guardamos el día seleccionado del 1 al 30
+            detallesMensual: repeatType === "month" ? {
+                diaDelMes: diaDelMes
+            } : null
+        };
+
+        console.log("¡Tarea Creada con éxito!", nuevaTarea);
+        
+        // Aquí podrías enviar 'nuevaTarea' a tu API / Base de datos o a un componente padre.
+
+        // Opcional: Limpiar el formulario y cerrarlo
+        setTitulo("");
+        setNota("");
+        setIsExpanded(false);
+        setRepeatType("");
+    }
+    const handleDiaChange = (id: keyof typeof diasSeleccionados) => {
         setDiasSeleccionados((prev) => ({
             ...prev,
             [id]: !prev[id],
         }));
     }
 
+    const opciones = Array.from({length:30},(_,i)=>i+1);
 
     if(isExpanded){
         return(
             <>
-            <div className= {`bg-white w-[66rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ${repeatType==="week" ? "h-[12rem] " :  repeatType==="month" ? "h-[15rem]" : "h-[5rem] " }`}>
-                <form>
+            <div className= {`bg-white w-[66rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ${repeatType==="week" ? "h-[12rem] " :  repeatType==="month" ? "h-[40rem]" : "h-[5rem] " }`}>
+                <form onSubmit={handleSubmit}>
                     <div>
-                        <input type="text" placeholder="Escribe el titulo de la tarea">
+                        <input type="text"
+                         placeholder="Escribe el titulo de la tarea"
+                         value={titulo}
+                         onChange={(e)=>setTitulo(e.target.value)}
+                         required
+
+                         >
                         </input>
                     </div>
                     <div>
-                        <input type="text" placeholder="Agrega una nota">
+                        <input type="text"
+                        placeholder="Agrega una nota"
+                        value={nota}
+                        onChange={(e)=>setNota(e.target.value)}
+                        >
                         </input>
                     </div> 
                     <div className="flex">
@@ -87,15 +129,14 @@ export default function CreateTask(){
                         <div>
                             <div className="flex">
                                 <p>Cantidad dias</p> 
-                                <select>
-                                    <option value={1}>1</option>
-                                    <option value={2}>2</option>
-                                    <option value={3}>3</option>
-                                    <option value={4}>4</option>
-                                    <option value={5}>5</option>
-                                    <option value={6}>6</option>
-                                    <option value={7}>7</option>
-                                </select>
+                            <select
+                                value={cantidadDiasSemana}
+                                onChange={(e) => setCantidadDiasSemana(Number(e.target.value))}
+                            >
+                                {[1,2,3,4,5,6,7].map(num => (
+                                    <option key={num} value={num}>{num}</option>
+                                ))}
+                            </select>
                             </div>
                             <div className="">
                                 <p>Dias que podes repetir</p>
@@ -107,28 +148,41 @@ export default function CreateTask(){
                                         >
                                             <input
                                             type="checkbox"
+                                            checked={diasSeleccionados[dia.id as keyof typeof diasSeleccionados]}
+                                            onChange={()=>handleDiaChange(dia.id as keyof typeof diasSeleccionados)}
                                             >
                                                 
                                             </input>
                                             <p>{dia.nombre}</p>
-                                            
-
                                         </label>
                                     ))}
                                 </div>
                             </div>
-                            <button className=" hover:color-red-500">
-                                Aceptar
-                            </button>
                     </div>
-
-                        
                     )}
                     {repeatType==="month" &&(
                         <div>
-                            <p>hola</p>
+                            <MyCalendar/>
+                                <select
+                                    value={diaDelMes}
+                                    onChange={(e)=> setDiaDelMes(Number(e.target.value))}
+                                >
+                                    {opciones.map((num)=>(
+                                        <option key={num} value={num}>
+                                            {num}
+                                        </option>
+                                    ))}
+                                </select>
                         </div>
                     )}
+                    <div className="mt-4 flex gap-2">
+                        <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600" type="submit">
+                            Aceptar
+                        </button>
+                        <button className="bg-gray-300 text-black px-4 py-1 rounded hover:bg-gray-400" type="button" onClick={() => setIsExpanded(false)}>
+                            Cancelar
+                        </button>
+                    </div>
                 </form>
 
             </div>
