@@ -12,9 +12,7 @@ export default function CreateTask(){
     }
 
     const [isExpanded, setIsExpanded] = useState(false)
-
     const [repeatType , setRepeatType] =useState("")
-
     const [titulo, setTitulo] = useState("")
     const [nota, setNota] = useState("")
     const [diaDelMes, setDiaDelMes] = useState(1)
@@ -34,6 +32,12 @@ export default function CreateTask(){
     function cancelType(){
         setRepeatType("")
     }
+    function corroborarSemanaCantidad(){
+        const cantidadTrue = Object.values(diasSeleccionados).filter(valor=>valor).length
+
+        return cantidadTrue >= cantidadDiasSemana
+
+    }
 
     const DIAS_SEMANA = [
         { id: "domingo", nombre: "Domingo" },
@@ -45,20 +49,35 @@ export default function CreateTask(){
         { id: "sabado", nombre: "Sábado" },
     ]
     const [diasSeleccionados ,setDiasSeleccionados] = useState({
-        domingo: false,
-        lunes: false,
-        martes: false,
-        miercoles: false,
-        jueves: false,
-        viernes: false,
-        sabado: false,
+        domingo: true,
+        lunes: true,
+        martes: true,
+        miercoles: true,
+        jueves: true,
+        viernes: true,
+        sabado: true,
     })
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault(); // Evita que la página se recargue
 
         // Creamos el objeto final con toda la información
+        if(
+            repeatType==="week" && !corroborarSemanaCantidad()
+        ){
+            alert(`Debes tener al menos ${cantidadDiasSemana} dias seleccionados`)
+            return;
+        }
         const nuevaTarea = {
+            //cambiar el userId cuando esten vinculados con la cuenta.
+            userId:null,
+            activa:true,
+            id:crypto.randomUUID(),
+            fechaCreacion:new Date().toISOString(),
+            rachaActual:0,
+            mejorRacha:0,
+            completadaHoy:false,
+            ultimaCompletacion:null,
             titulo,
             nota,
             tipoRepeticion: repeatType,
@@ -69,7 +88,8 @@ export default function CreateTask(){
             } : null,
             // Si es mensual, guardamos el día seleccionado del 1 al 30
             detallesMensual: repeatType === "month" ? {
-                diaDelMes: diaDelMes
+                cantidadDias: diaDelMes,
+                fechas: selectedDates.map(date=>date.toISOString())
             } : null
         };
 
@@ -79,9 +99,24 @@ export default function CreateTask(){
             Detalle: ${nuevaTarea.nota}
             Tipo: ${nuevaTarea.tipoRepeticion}
             Mensual: ${JSON.stringify(nuevaTarea.detallesMensual)}
-            Semanal: ${JSON.stringify(nuevaTarea.detallesSemanal)}`
+            Semanal: ${JSON.stringify(nuevaTarea.detallesSemanal)}
+            Dias mensual: ${JSON.stringify(nuevaTarea.detallesMensual?.fechas)}
+            `
+            
             )
         console.log("¡Tarea Creada con éxito!", nuevaTarea);
+        setSelectedDates([])
+        setDiaDelMes(1)
+        setCantidadDiasSemana(1)
+        setDiasSeleccionados({
+            domingo: true,
+            lunes: true,
+            martes: true,
+            miercoles: true,
+            jueves: true,
+            viernes: true,
+            sabado: true,
+        });
         
         // Aquí podrías enviar 'nuevaTarea' a tu API / Base de datos o a un componente padre.
 
@@ -108,7 +143,7 @@ export default function CreateTask(){
     if(isExpanded){
         return(
             <>
-            <div className= {`bg-white w-[66rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ${repeatType==="week" ? "h-[12rem] " :  repeatType==="month" ? "h-[40rem]" : "h-[8rem] " }`}>
+            <div className= {`bg-white w-[66rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ${repeatType==="week" ? "h-[14rem] " :  repeatType==="month" ? "h-[33rem]" : "h-[8rem] " }`}>
                 <form onSubmit={handleSubmit}>
                     <div>
                         <input type="text"
