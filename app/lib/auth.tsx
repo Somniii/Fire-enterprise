@@ -4,7 +4,7 @@ import { auth, db, googleProvider } from "./firebase";
 import {collection , query , where , getDocs} from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth";
 import { redirect } from "next/navigation";
-
+import { updateDoc } from "firebase/firestore";
 /*        const nuevaTarea = {
             //cambiar el userId cuando esten vinculados con la cuenta.
             userId:null,
@@ -62,6 +62,17 @@ export const crearTarea = async (task: TaskInterface) => {
     ...task,
     userId: currentUser.uid  // ← sobreescribe el "anonimo"
   });
+};
+
+//MODIFICAR TAREAS
+
+export const modificarTarea = async (taskId: string, cambios: Partial<TaskInterface>) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("No hay usuario logueado");
+
+    await updateDoc(doc(db, "tasks", taskId), {
+        ...cambios
+    });
 };
 
 //TRAER TAREAS

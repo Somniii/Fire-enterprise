@@ -1,6 +1,8 @@
 //HAY POCAS COSAS OPCIONAL PERO VOY A MARCAR MUCHAS PARA EMPEZAR A TRABAJAR DE A POCO
+import { auth } from "@/app/lib/firebase";
 import { TaskInterface } from "@/app/lib/auth";
-
+import { modificarTarea } from "@/app/lib/auth";
+import {useState} from "react"
 /*interface Task{
     idTarea: string;
     idUsuario?: string | null;
@@ -29,18 +31,28 @@ import { TaskInterface } from "@/app/lib/auth";
     rachaPorTipo?:number;
 
 }*/
+
 interface Props{
     task:TaskInterface
 }
+
+
+
 //rachaPorTipo se resetea despues de cada ciclo ejemplo es miercoles hiciste racha martes y lunes bueno rachaportipo es = 2 , se compara con el cantidadDias que calcula la cantidad de dias por mes o semana uqe ibas a hacerlo , cuando llega a ej 2/3 y le da un feedback al usuario cuanto le falta por semana o mes
 //para calcular la cantidad de veces que tenes uqe hacerlo por el mes o por la semana lo ves por la cantidadDias 
 export default function Task({task}:Props){
+    const [rachaActual,setRachaActual] = useState(task.rachaActual)
+    function sumarRacha(){
+        const nuevaRachaActual = (task.rachaActual ?? 0)+1
+        modificarTarea(task.taskId,{rachaActual: nuevaRachaActual})
+        setRachaActual(nuevaRachaActual)
+    }
     return(
         <>
             <div className="bg-white w-[66rem] h-[3rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ">
                 <div className="flex">
                     <form>
-                        <input type="checkbox" />
+                        <input type="checkbox" onChange={sumarRacha} />
                         <input/>
                     </form>
                     <p>{task.titulo}</p>
@@ -48,7 +60,7 @@ export default function Task({task}:Props){
                         {task.tipoRepeticion}
                     </p>
                     <p>
-                        {task.rachaActual}
+                        {rachaActual}
                     </p>
                 </div>
             </div>
