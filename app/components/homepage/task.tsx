@@ -1,5 +1,7 @@
 //HAY POCAS COSAS OPCIONAL PERO VOY A MARCAR MUCHAS PARA EMPEZAR A TRABAJAR DE A POCO
-interface Task{
+import { TaskInterface } from "@/app/lib/auth";
+
+/*interface Task{
     idTarea: string;
     idUsuario?: string | null;
     fechaCreacion?: Date;
@@ -26,9 +28,9 @@ interface Task{
     //La cantidad de dias que va hacciendo la tarea por un ciclo especifico ej : dias: lunes martes jueves hizo lunes martes estamos a jueves rachatipo muestra =2 y compara con cantidad dias mostrando 2/3 , cuando sea domingo se resetea de nuevo a 0 para que vaya sumando de nuevo
     rachaPorTipo?:number;
 
-}
+}*/
 interface Props{
-    task:Task
+    task:TaskInterface
 }
 //rachaPorTipo se resetea despues de cada ciclo ejemplo es miercoles hiciste racha martes y lunes bueno rachaportipo es = 2 , se compara con el cantidadDias que calcula la cantidad de dias por mes o semana uqe ibas a hacerlo , cuando llega a ej 2/3 y le da un feedback al usuario cuanto le falta por semana o mes
 //para calcular la cantidad de veces que tenes uqe hacerlo por el mes o por la semana lo ves por la cantidadDias 
@@ -36,7 +38,7 @@ export default function Task({task}:Props){
     return(
         <>
             <div className="bg-white w-[66rem] h-[3rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ">
-                <div>
+                <div className="flex">
                     <form>
                         <input type="checkbox" />
                         <input/>

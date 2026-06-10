@@ -3,7 +3,9 @@ import addSvg from "../../assets/icons/add.svg"
 import {useState} from "react"
 import MyCalendar from "./calendar"
 import { crearTarea } from "@/app/lib/auth"
-export default function CreateTask(){
+
+export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => void }) {
+
     function something(){
 
     }
@@ -21,8 +23,6 @@ export default function CreateTask(){
 
     //useSTATE DE MYCALENDAR
     const [selectedDates,setSelectedDates] = useState<Date[]>([])
-
-
 
     function monthlyType(){
         setRepeatType("month")
@@ -129,6 +129,7 @@ export default function CreateTask(){
         
         // Aquí podrías enviar 'nuevaTarea' a tu API / Base de datos o a un componente padre.
         await crearTarea(nuevaTarea)
+        onTareaCreada()
         // Opcional: Limpiar el formulario y cerrarlo
         setTitulo("");
         setNota("");

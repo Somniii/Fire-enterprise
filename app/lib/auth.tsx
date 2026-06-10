@@ -1,6 +1,8 @@
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup,signOut} from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "./firebase";
+import {collection , query , where , getDocs} from "firebase/firestore"
+import { redirect } from "next/navigation";
 
 /*        const nuevaTarea = {
             //cambiar el userId cuando esten vinculados con la cuenta.
@@ -27,7 +29,7 @@ import { auth, db, googleProvider } from "./firebase";
                 fechas: selectedDates.map(date=>date.toISOString())
             } : null
         }; */
-interface Task{
+export interface TaskInterface{
   detallesSemanal: { cantidadDias: number; dias: string[] } | null,
   detallesMensual: { cantidadDias: number; fechas: string[] } | null,
   taskId:string,
@@ -48,15 +50,30 @@ interface Task{
   
 }
 //CREACION TAREAS:
-export const crearTarea = async (task: Task) => {
+export const crearTarea = async (task: TaskInterface) => {
   const currentUser = auth.currentUser;
-  if (!currentUser) throw new Error("No hay usuario logueado");
+  if (!currentUser){ 
+    throw new Error("No hay usuario logueado") 
+    
+  };
 
   await setDoc(doc(db, "tasks", task.taskId), {
     ...task,
     userId: currentUser.uid  // ← sobreescribe el "anonimo"
   });
 };
+
+//TRAER TAREAS
+export const obtenerTareas = async():Promise<TaskInterface[]> =>{
+    const currentUser = auth.currentUser;
+    if(!currentUser) throw new Error("No hay usuario logueado");
+    const q = query(
+        collection(db,"tasks"),
+        where("userId","==" ,currentUser.uid)
+    )
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map(doc=>doc.data() as TaskInterface);
+}
 
 
 // 1. Registrar usuario con Email + Racha + Datos iniciales de juego
