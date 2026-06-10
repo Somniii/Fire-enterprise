@@ -69,7 +69,7 @@ export default function CreateTask(){
             return;
         }
         if(
-            selectedDates.length===0
+            (selectedDates.length===0 && repeatType==="month")
         ){
             alert('Debes tener al menos un dia del mes seleccionado')
             return;
