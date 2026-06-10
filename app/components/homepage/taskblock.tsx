@@ -7,7 +7,6 @@ export default function TaskBlock(){
         <div  className="h-[49rem] w-[68rem] mx-auto flex ml-[2rem] ">
             <NotGlass>
                 <TaskList/>
-                <Task/>
             </NotGlass>
         </div>
 

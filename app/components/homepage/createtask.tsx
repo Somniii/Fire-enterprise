@@ -2,6 +2,7 @@
 import addSvg from "../../assets/icons/add.svg"
 import {useState} from "react"
 import MyCalendar from "./calendar"
+import { crearTarea } from "@/app/lib/auth"
 export default function CreateTask(){
     function something(){
 
@@ -58,7 +59,7 @@ export default function CreateTask(){
         sabado: true,
     })
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault(); // Evita que la página se recargue
 
         // Creamos el objeto final con toda la información
@@ -75,10 +76,9 @@ export default function CreateTask(){
             return;
         }
         const nuevaTarea = {
-            //cambiar el userId cuando esten vinculados con la cuenta.
-            userId:null,
+   
             activa:true,
-            id:crypto.randomUUID(),
+            taskId:crypto.randomUUID(),
             fechaCreacion:new Date().toISOString(),
             rachaActual:0,
             mejorRacha:0,
@@ -86,7 +86,9 @@ export default function CreateTask(){
             ultimaCompletacion:null,
             titulo,
             nota,
+            rachaPorTipo:0,
             tipoRepeticion: repeatType,
+            cantidadDias: repeatType === "week" ? cantidadDiasSemana : diaDelMes,
             // Si es semanal, guardamos los días checkeados y la cantidad
             detallesSemanal: repeatType === "week" ? {
                 cantidadDias: cantidadDiasSemana,
@@ -98,7 +100,7 @@ export default function CreateTask(){
                 fechas: selectedDates.map(date=>date.toISOString())
             } : null
         };
-
+/*
             alert(
             `¡Tarea Creada con éxito!
             Titulo: ${nuevaTarea.titulo}
@@ -122,10 +124,11 @@ export default function CreateTask(){
             jueves: true,
             viernes: true,
             sabado: true,
-        });
+        });*/
+
         
         // Aquí podrías enviar 'nuevaTarea' a tu API / Base de datos o a un componente padre.
-
+        await crearTarea(nuevaTarea)
         // Opcional: Limpiar el formulario y cerrarlo
         setTitulo("");
         setNota("");

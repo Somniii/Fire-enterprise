@@ -2,6 +2,63 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithP
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "./firebase";
 
+/*        const nuevaTarea = {
+            //cambiar el userId cuando esten vinculados con la cuenta.
+            userId:null,
+            activa:true,
+            id:crypto.randomUUID(),
+            fechaCreacion:new Date().toISOString(),
+            rachaActual:0,
+            mejorRacha:0,
+            completadaHoy:false,
+            ultimaCompletacion:null,
+            titulo,
+            nota,
+            rachaPorTipo:0,
+            tipoRepeticion: repeatType,
+            // Si es semanal, guardamos los días checkeados y la cantidad
+            detallesSemanal: repeatType === "week" ? {
+                cantidadDias: cantidadDiasSemana,
+                dias: Object.keys(diasSeleccionados).filter(key => diasSeleccionados[key as keyof typeof diasSeleccionados])
+            } : null,
+            // Si es mensual, guardamos el día seleccionado del 1 al 30
+            detallesMensual: repeatType === "month" ? {
+                cantidadDias: diaDelMes,
+                fechas: selectedDates.map(date=>date.toISOString())
+            } : null
+        }; */
+interface Task{
+  detallesSemanal: { cantidadDias: number; dias: string[] } | null,
+  detallesMensual: { cantidadDias: number; fechas: string[] } | null,
+  taskId:string,
+  activa:boolean,
+  fechaCreacion: string,
+  rachaActual:number,
+  mejorRacha:number,
+  completadaHoy: boolean,
+  ultimaCompletacion: string |null,
+  titulo: string,
+  nota: string,
+  rachaPorTipo:number,
+  tipoRepeticion:string,
+  cantidadDias: number,
+  diasSemana?: string[],
+  fechasMes?: string[],
+  
+  
+}
+//CREACION TAREAS:
+export const crearTarea = async (task: Task) => {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error("No hay usuario logueado");
+
+  await setDoc(doc(db, "tasks", task.taskId), {
+    ...task,
+    userId: currentUser.uid  // ← sobreescribe el "anonimo"
+  });
+};
+
+
 // 1. Registrar usuario con Email + Racha + Datos iniciales de juego
 export const registerWithEmail = async (email: string, password: string) => {
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -25,6 +82,7 @@ export const registerWithEmail = async (email: string, password: string) => {
     xp: 0,
     createdAt: new Date().toISOString()
   });
+
 
   return user;
 };
