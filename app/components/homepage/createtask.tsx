@@ -68,6 +68,12 @@ export default function CreateTask(){
             alert(`Debes tener al menos ${cantidadDiasSemana} dias seleccionados`)
             return;
         }
+        if(
+            selectedDates.length===0
+        ){
+            alert('Debes tener al menos un dia del mes seleccionado')
+            return;
+        }
         const nuevaTarea = {
             //cambiar el userId cuando esten vinculados con la cuenta.
             userId:null,
