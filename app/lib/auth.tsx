@@ -66,20 +66,21 @@ export const crearTarea = async (task: TaskInterface) => {
 
 //TRAER TAREAS
 export const obtenerTareas = async (): Promise<TaskInterface[]> => {
-    return new Promise((resolve, reject) => {
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                reject(new Error("No hay usuario logueado"))
-                return
-            }
-            const q = query(
-                collection(db, "tasks"),
-                where("userId", "==", user.uid)
-            )
-            const snapshot = await getDocs(q)
-            resolve(snapshot.docs.map(doc => doc.data() as TaskInterface))
+    const currentUser = await new Promise<import("firebase/auth").User | null>((resolve) => {
+        const unsub = onAuthStateChanged(auth, (user) => {
+            unsub()  // ← cancela el listener inmediatamente después del primer resultado
+            resolve(user)
         })
     })
+
+    if (!currentUser) throw new Error("No hay usuario logueado")
+
+    const q = query(
+        collection(db, "tasks"),
+        where("userId", "==", currentUser.uid)
+    )
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map(doc => doc.data() as TaskInterface)
 }
 
 
