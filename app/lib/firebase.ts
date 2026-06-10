@@ -1,7 +1,7 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-// Esto trae las claves ocultas de tu archivo .env.local
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -12,7 +12,8 @@ const firebaseConfig = {
 };
 
 // Inicializamos la app de Firebase
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig) 
 
-// Exportamos la base de datos para usarla en la app
-export const db = getFirestore(app);
+export const db = getFirestore(app) 
+export const auth = getAuth(app) 
+export const googleProvider = new GoogleAuthProvider() 
