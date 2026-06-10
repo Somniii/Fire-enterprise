@@ -13,12 +13,22 @@ import {
 } from 'date-fns';
 import {es} from 'date-fns/locale';
 
-export default function Calendar(){
+
+interface Props{
+    selectedDates: Date[];
+    setSelectedDates: React.Dispatch<React.SetStateAction<Date[]>>
+}
+
+export default function Calendar({selectedDates, setSelectedDates}:Props){
+
+
     const[currentMonth , setCurrentMonth] = useState(new Date())
     //ESTA IGUAL SE PUEDE SELECCIONAR MAS DE UNA FECHA ASI QUE DEBERIA SER UN ARRAY
     
-    const[selectedDates, setSelectedDates] = useState<Date[]>([new Date()])
-
+    //const[selectedDates, setSelectedDates] = useState<Date[]>([new Date()])
+    function cantidadDias(){
+        return selectedDates.length
+    }
 
     const monthStart = startOfMonth(currentMonth)
     const monthEnd = endOfMonth(monthStart)

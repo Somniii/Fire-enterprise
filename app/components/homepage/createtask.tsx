@@ -20,11 +20,19 @@ export default function CreateTask(){
     const [diaDelMes, setDiaDelMes] = useState(1)
     const [cantidadDiasSemana ,setCantidadDiasSemana ] = useState(1)
 
+    //useSTATE DE MYCALENDAR
+    const [selectedDates,setSelectedDates] = useState<Date[]>([])
+
+
+
     function monthlyType(){
         setRepeatType("month")
     }
     function weeklyType(){
         setRepeatType("week")
+    }
+    function cancelType(){
+        setRepeatType("")
     }
 
     const DIAS_SEMANA = [
@@ -65,6 +73,14 @@ export default function CreateTask(){
             } : null
         };
 
+            alert(
+            `¡Tarea Creada con éxito!
+            Titulo: ${nuevaTarea.titulo}
+            Detalle: ${nuevaTarea.nota}
+            Tipo: ${nuevaTarea.tipoRepeticion}
+            Mensual: ${JSON.stringify(nuevaTarea.detallesMensual)}
+            Semanal: ${JSON.stringify(nuevaTarea.detallesSemanal)}`
+            )
         console.log("¡Tarea Creada con éxito!", nuevaTarea);
         
         // Aquí podrías enviar 'nuevaTarea' a tu API / Base de datos o a un componente padre.
@@ -82,12 +98,17 @@ export default function CreateTask(){
         }));
     }
 
-    const opciones = Array.from({length:30},(_,i)=>i+1);
+    const cantidadDias = selectedDates.length
+    
+    const opciones = Array.from(
+        {length: cantidadDias},
+        (_,i) =>i +1
+    )
 
     if(isExpanded){
         return(
             <>
-            <div className= {`bg-white w-[66rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ${repeatType==="week" ? "h-[12rem] " :  repeatType==="month" ? "h-[40rem]" : "h-[5rem] " }`}>
+            <div className= {`bg-white w-[66rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ${repeatType==="week" ? "h-[12rem] " :  repeatType==="month" ? "h-[40rem]" : "h-[8rem] " }`}>
                 <form onSubmit={handleSubmit}>
                     <div>
                         <input type="text"
@@ -125,6 +146,13 @@ export default function CreateTask(){
                             <p>Repeticion mensual</p>
                         </div>
                     </div>
+                    {(repeatType==="week" || repeatType==="month")&& (
+                        <div>
+                            <button onClick={cancelType}>
+                                <p>Cancelar repeticion</p>
+                            </button>
+                        </div>
+                    ) }
                     {repeatType==="week" && (
                         <div>
                             <div className="flex">
@@ -162,7 +190,11 @@ export default function CreateTask(){
                     )}
                     {repeatType==="month" &&(
                         <div>
-                            <MyCalendar/>
+                                <MyCalendar
+                                selectedDates={selectedDates}
+                                setSelectedDates={setSelectedDates}
+                                 />
+                                <p>Cantidad dias</p>
                                 <select
                                     value={diaDelMes}
                                     onChange={(e)=> setDiaDelMes(Number(e.target.value))}
