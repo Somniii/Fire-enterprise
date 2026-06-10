@@ -2,6 +2,7 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithP
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "./firebase";
 import {collection , query , where , getDocs} from "firebase/firestore"
+import { onAuthStateChanged } from "firebase/auth";
 import { redirect } from "next/navigation";
 
 /*        const nuevaTarea = {
@@ -64,15 +65,21 @@ export const crearTarea = async (task: TaskInterface) => {
 };
 
 //TRAER TAREAS
-export const obtenerTareas = async():Promise<TaskInterface[]> =>{
-    const currentUser = auth.currentUser;
-    if(!currentUser) throw new Error("No hay usuario logueado");
-    const q = query(
-        collection(db,"tasks"),
-        where("userId","==" ,currentUser.uid)
-    )
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc=>doc.data() as TaskInterface);
+export const obtenerTareas = async (): Promise<TaskInterface[]> => {
+    return new Promise((resolve, reject) => {
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                reject(new Error("No hay usuario logueado"))
+                return
+            }
+            const q = query(
+                collection(db, "tasks"),
+                where("userId", "==", user.uid)
+            )
+            const snapshot = await getDocs(q)
+            resolve(snapshot.docs.map(doc => doc.data() as TaskInterface))
+        })
+    })
 }
 
 
