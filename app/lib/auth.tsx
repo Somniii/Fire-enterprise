@@ -1,13 +1,13 @@
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, signOut} from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup,signOut} from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "./firebase";
 
-// 1. Registrar usuario con Email y crearle la racha en 0
+// 1. Registrar usuario con Email + Racha + Datos iniciales de juego
 export const registerWithEmail = async (email: string, password: string) => {
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
 
-  // Inicializamos la racha del usuario en la colección streaks usando su UID
+  // A. Inicializamos su racha 
   await setDoc(doc(db, "streaks", user.uid), {
     userId: user.uid,
     currentStreak: 0,
@@ -15,10 +15,21 @@ export const registerWithEmail = async (email: string, password: string) => {
     lastCompletedDate: null
   });
 
+  // B. DEFINIMOS EL USUARIO (Datos de economía y nivel de la App)
+  await setDoc(doc(db, "users", user.uid), {
+    uid: user.uid,
+    email: user.email,
+    username: user.email?.split('@')[0], // Le pone de nombre lo que está antes del @ temporalmente
+    coins: 100, // Les damos monedas de bienvenida para el gacha
+    level: 1,
+    xp: 0,
+    createdAt: new Date().toISOString()
+  });
+
   return user;
 };
 
-// 2. Iniciar sesión con Email
+// 2. Iniciar sesión con Email 
 export const loginWithEmail = async (email: string, password: string) => {
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
   return userCredential.user;
@@ -29,17 +40,28 @@ export const loginWithGoogle = async () => {
   const userCredential = await signInWithPopup(auth, googleProvider);
   const user = userCredential.user;
 
-  // Verificamos si el usuario de Google ya tiene un documento de racha creado
   const streakDocRef = doc(db, "streaks", user.uid);
   const streakDoc = await getDoc(streakDocRef);
 
-  // Si es la primera vez que entra con Google, le creamos la racha automática
+  // Si es la primera vez que entra con Google, le creamos la racha y el perfil de juego
   if (!streakDoc.exists()) {
+    // Creamos la racha
     await setDoc(streakDocRef, {
       userId: user.uid,
       currentStreak: 0,
       longestStreak: 0,
       lastCompletedDate: null
+    });
+
+    // Creamos el usuario definido con sus monedas y nivel
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      email: user.email,
+      username: user.displayName || "Usuario Fire",
+      coins: 100,
+      level: 1,
+      xp: 0,
+      createdAt: new Date().toISOString()
     });
   }
 
