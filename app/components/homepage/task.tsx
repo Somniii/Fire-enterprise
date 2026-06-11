@@ -4,6 +4,10 @@ import { auth } from "@/app/lib/firebase";
 import { TaskInterface } from "@/app/lib/auth";
 import { modificarTarea } from "@/app/lib/auth";
 import {useState , useEffect} from "react"
+import fireSvg from '../../assets/icons/fire.svg'
+import fireOrangeSvg from '../../assets/icons/fire-orange.svg'
+import fireGraySvg from '../../assets/icons/fire-gray.svg'
+
 /*interface Task{
     idTarea: string;
     idUsuario?: string | null;
@@ -44,6 +48,7 @@ interface Props{
 export default function Task({task}:Props){
     const [rachaActual,setRachaActual] = useState(task.rachaActual)
     const [rachaCiclo ,setRachaCiclo] = useState(task.rachaCiclo ??0)
+    const [diasFaltantes, setDiasFaltantes] = useState( task.cantidadDias- (task.rachaCiclo ?? 0) )
     const diaActual = new Date()
     //si puede hacer la racha ese ciclo ej esa semana o ya no le dan los dias
            //1. QUEDARNOS CON LAS TAREAS ACTIVAS DE ESE USUARIO
@@ -123,7 +128,9 @@ export default function Task({task}:Props){
         }
 
     }
-
+    const cantidadDiasMeta = task.cantidadDias??0
+    const fuegoGrisFaltantes = Math.max(0,cantidadDiasMeta - rachaCiclo)
+    //aca calculamos los dias faltantes se pone el ?? 0 por que si la racha ciclo esta vacia se reemplaza por 0
     return(
         <>
             <div className="bg-white w-[66rem] h-[3rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ">
@@ -139,9 +146,22 @@ export default function Task({task}:Props){
                     <p>
                         {task.detallesSemanal?.dias}
                     </p>
-                    <p>
-                        {rachaActual}
-                    </p>
+                    <div className="flex gap-1">
+                        {Array.from({length:rachaCiclo}).map((_,indice)=>(
+                            <div>
+                                <img className="bg-Red-50" key={indice} src={fireOrangeSvg.src}></img>
+                            </div>
+                        ))}
+                    
+                        {Array.from({length:fuegoGrisFaltantes}).map((_,indice)=>(
+                            <div>
+                                <img className="bg-red-50" key={indice} src={fireGraySvg.src}></img>
+                            </div>
+                        ))}
+                    </div>
+                    <div>
+
+                    </div>
                 </div>
             </div>
         </>
