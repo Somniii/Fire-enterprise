@@ -47,6 +47,7 @@ export interface TaskInterface{
   cantidadDias: number,
   diasSemana?: string[],
   fechasMes?: string[],
+  rachaCiclo? : number,
   
   
 }
