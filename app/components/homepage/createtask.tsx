@@ -97,7 +97,7 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
             // Si es mensual, guardamos el día seleccionado del 1 al 30
             detallesMensual: repeatType === "month" ? {
                 cantidadDias: diaDelMes,
-                fechas: selectedDates.map(date=>date.toISOString())
+                fechas: selectedDates.map(date=>date.getDate().toString())
             } : null
         };
 /*

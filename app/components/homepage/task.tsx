@@ -47,6 +47,15 @@ export default function Task({task}:Props){
     //si puede hacer la racha ese ciclo ej esa semana o ya no le dan los dias
     let puedeCiclo = true
     const DIAS_ORDENADOS = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"]
+           //1. QUEDARNOS CON LAS TAREAS ACTIVAS DE ESE USUARIO
+              //2. QUEDARNOS CON LAS TAREAS QUE SE PUEDEN HACER ESE DIA DE ESE USUARIO
+              
+    
+              //3. CREAR UN ARRAY CON ESAS TAREAS PARA PONERLAS EN EL RENDER
+              //4. CALCULAR QUE DIA SEMANAL MOSTRAR EJ 4 FUEGOS PQ HIZO 4 LA ANTERIOR VEZ Y EN TOTAL TIENE Q HACER 5 SI ES SEMANA , SI ES MES QUE SALGA 4/5 PQ SI UNO PONE MUCHOS DIAS IMAGINATE 24 FUEGOS QUE SEA 4/25 MEJOR
+              //O MEJOR AUN QUE A PARTIR DE MAS DE 7 TAREAS TENGA OTRA VISTA QUE SE FIJE 4/8 EJ EN VEZ DE 8 FUEGOS(esto se ve cno un if(task.cantidad > 7))
+      
+      
     function verificarRachaCiclo(){
         
         const diasSemana = task.diasSemana ?? []
@@ -74,19 +83,7 @@ export default function Task({task}:Props){
         }
         return true;
     }
-    function mostrarTarea(){
-        //1. QUEDARNOS CON LAS TAREAS ACTIVAS DE ESE USUARIO
-        //2. QUEDARNOS CON LAS TAREAS QUE SE PUEDEN HACER ESE DIA DE ESE USUARIO
-        const nombreDiaActual = DIAS_ORDENADOS[diaActual.getDay()]
-        if(task.activa && task.diasSemana?.includes(nombreDiaActual)){
 
-        }
-        //3. CREAR UN ARRAY CON ESAS TAREAS PARA PONERLAS EN EL RENDER
-        //4. CALCULAR QUE DIA SEMANAL MOSTRAR EJ 4 FUEGOS PQ HIZO 4 LA ANTERIOR VEZ Y EN TOTAL TIENE Q HACER 5 SI ES SEMANA , SI ES MES QUE SALGA 4/5 PQ SI UNO PONE MUCHOS DIAS IMAGINATE 24 FUEGOS QUE SEA 4/25 MEJOR
-        //O MEJOR AUN QUE A PARTIR DE MAS DE 7 TAREAS TENGA OTRA VISTA QUE SE FIJE 4/8 EJ EN VEZ DE 8 FUEGOS(esto se ve cno un if(task.cantidad > 7))
-
-
-    }
     function sumarRacha(){
         //SUMAR LA RACHA , LA RACHA SE EMPIEZA A MOSTRAR EN COMPLETADAS DEL DIA , SE TIENE QUE ACTUALIZAR EL RACHASEMANAL CON EL SET PARA UQE SE RENDERICE Y SI YA PASO EL CICLO(semana,mes)SE VE CON UN COLOR FUEGO ESPECIAL  
         const nuevaRachaActual = (task.rachaActual ?? 0)+1
@@ -105,6 +102,9 @@ export default function Task({task}:Props){
                     <p>{task.titulo}</p>
                     <p>
                         {task.tipoRepeticion}
+                    </p>
+                    <p>
+                        {task.detallesSemanal?.dias}
                     </p>
                     <p>
                         {rachaActual}
