@@ -1,8 +1,9 @@
 //HAY POCAS COSAS OPCIONAL PERO VOY A MARCAR MUCHAS PARA EMPEZAR A TRABAJAR DE A POCO
+"use client"
 import { auth } from "@/app/lib/firebase";
 import { TaskInterface } from "@/app/lib/auth";
 import { modificarTarea } from "@/app/lib/auth";
-import {useState} from "react"
+import {useState , useEffect} from "react"
 /*interface Task{
     idTarea: string;
     idUsuario?: string | null;
@@ -42,11 +43,9 @@ interface Props{
 //para calcular la cantidad de veces que tenes uqe hacerlo por el mes o por la semana lo ves por la cantidadDias 
 export default function Task({task}:Props){
     const [rachaActual,setRachaActual] = useState(task.rachaActual)
+    const [rachaCiclo ,setRachaCiclo] = useState(task.rachaCiclo ??0)
     const diaActual = new Date()
-    let cantidadDiasFaltan = 0
     //si puede hacer la racha ese ciclo ej esa semana o ya no le dan los dias
-    let puedeCiclo = true
-    const DIAS_ORDENADOS = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"]
            //1. QUEDARNOS CON LAS TAREAS ACTIVAS DE ESE USUARIO
               //2. QUEDARNOS CON LAS TAREAS QUE SE PUEDEN HACER ESE DIA DE ESE USUARIO
               
@@ -54,41 +53,75 @@ export default function Task({task}:Props){
               //3. CREAR UN ARRAY CON ESAS TAREAS PARA PONERLAS EN EL RENDER
               //4. CALCULAR QUE DIA SEMANAL MOSTRAR EJ 4 FUEGOS PQ HIZO 4 LA ANTERIOR VEZ Y EN TOTAL TIENE Q HACER 5 SI ES SEMANA , SI ES MES QUE SALGA 4/5 PQ SI UNO PONE MUCHOS DIAS IMAGINATE 24 FUEGOS QUE SEA 4/25 MEJOR
               //O MEJOR AUN QUE A PARTIR DE MAS DE 7 TAREAS TENGA OTRA VISTA QUE SE FIJE 4/8 EJ EN VEZ DE 8 FUEGOS(esto se ve cno un if(task.cantidad > 7))
-      
-      
-    function verificarRachaCiclo(){
-        
+    useEffect(()=>{
+        const DIAS_ORDENADOS = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"]
+
         const diasSemana = task.diasSemana ?? []
-        const rachaCiclo = task.rachaCiclo ?? 0
         const cantidadDiasMeta = task.cantidadDias ?? 0
-        //AHORA DEBERIA DEVOLVER EL DIA TIPO "jueves"
+        const diaActual = new Date();
+        //vemos que dia de la semana estamos
+        const indiceHoy = diaActual.getDay()
+        //vemos que dia del mes estamos
+        const indiceMes = diaActual.getDate()
+        //vemos cual es el ultimo dia del mes(si es 28 29 30 o 31) 
+
+        //Si estamos a domingo (domigno es 0) y la racha ciclo es mayor a 0(osea si hizo algo de racha) entonces la racha ciclo se pone en 0
+        //RESETEO SEMANAL
+        if(task.tipoRepeticion === "week" && indiceHoy===0 && rachaCiclo >0){
+            setRachaCiclo(0)
+            modificarTarea(task.taskId,{rachaCiclo:0})
+        }
+        //RESETEO MENSUAL
+        if(task.tipoRepeticion === "month" && indiceMes===1 && rachaCiclo >0){
+            setRachaCiclo(0)
+            modificarTarea(task.taskId,{rachaCiclo:0})
+        }
 
         if(task.tipoRepeticion!=="" && task.activa===true){
             if(!task.completadaHoy){
-                const diaActual = new Date();
-                const indiceHoy = diaActual.getDay()
+
                 //CALCULAMOS LA CANTIDAD DE DIAS QUE FALTAN EJ TENEMOS QUE HACER 4 POR DIA Y PODEMOS HACER LUN MAR JUE VIE Y SAB Y HICIMOS LUN MAR JUE TENEMOS 3 DIAS NOS FALTAN 1 PERO PODEMOS 2 DIAS MAS
                 const cantidadDiasFaltan = cantidadDiasMeta -rachaCiclo
-   
+                
                 //VER EL DIA ACTUAL Y COMPARARLO CON LOS DIAS QUE PODEMOS HACER RACHA IF(DIACTUAL == DIASEMANA) OK PASAMOS ALSIGUIENTE
                 const diasDisponiblesRestantes = diasSemana.filter(dia=>{
                     const indiceDiaPermitido = DIAS_ORDENADOS.indexOf(dia);
                     return indiceDiaPermitido >= indiceHoy;
                 }).length 
                 if(cantidadDiasFaltan >diasDisponiblesRestantes){
-                    return false;
+                    modificarTarea(task.taskId,{rachaActual:0})
+                    setRachaActual(0)
                 }
+                //VEMOS SI HOY ES DOMINGO
+
+                
                 //
             }
         }
-        return true;
-    }
-
-    function sumarRacha(){
+    },[task.taskId, task.tipoRepeticion, task.activa, task.completadaHoy, task.diasSemana, rachaCiclo, task.cantidadDias, rachaActual])
+    //se desarmo task en propiedades asi no se manda siempre el cmabio a la firebase y evitas que useeffect se dispare por cualquier minimo cambio
+    function sumarRacha(e: React.ChangeEvent<HTMLInputElement>){
+        //VEMOS SI ESTA CHECKEADA LA TAREA DE HOY
+        const estaCheckeado = e.target.checked;
         //SUMAR LA RACHA , LA RACHA SE EMPIEZA A MOSTRAR EN COMPLETADAS DEL DIA , SE TIENE QUE ACTUALIZAR EL RACHASEMANAL CON EL SET PARA UQE SE RENDERICE Y SI YA PASO EL CICLO(semana,mes)SE VE CON UN COLOR FUEGO ESPECIAL  
-        const nuevaRachaActual = (task.rachaActual ?? 0)+1
-        modificarTarea(task.taskId,{rachaActual: nuevaRachaActual})
-        setRachaActual(nuevaRachaActual)
+        //VEMOS SI ETA CHECKEADO
+        if(estaCheckeado){
+            const nuevaRachaActual = (task.rachaActual ?? 0)+1
+            const nuevaRachaCiclo = (task.rachaCiclo ?? 0) +1
+            const ultimaCompletacion = new Date().toISOString()
+            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: true,ultimaCompletacion: ultimaCompletacion , rachaCiclo:nuevaRachaCiclo})
+            setRachaActual(nuevaRachaActual)
+            setRachaCiclo(nuevaRachaCiclo)
+        }else{
+            //SI EL USUARIO DESCHECKEA
+            const nuevaRachaActual = (task.rachaActual ?? 0)-1
+            const nuevaRachaCiclo = (task.rachaCiclo ?? 0) -1
+            setRachaCiclo(nuevaRachaCiclo)
+            setRachaActual(nuevaRachaActual);
+            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: false,ultimaCompletacion: null , rachaCiclo:nuevaRachaCiclo})
+
+        }
+
     }
 
     return(
@@ -99,7 +132,7 @@ export default function Task({task}:Props){
                         <input type="checkbox" onChange={sumarRacha} />
                         <input/>
                     </form>
-                    <p>{task.titulo}</p>
+                    <p className="text-black">{task.titulo}</p>
                     <p>
                         {task.tipoRepeticion}
                     </p>
