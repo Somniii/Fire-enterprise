@@ -7,6 +7,8 @@ import {useState , useEffect} from "react"
 import fireSvg from '../../assets/icons/fire.svg'
 import fireOrangeSvg from '../../assets/icons/fire-orange.svg'
 import fireGraySvg from '../../assets/icons/fire-gray.svg'
+import checkbox from '../../assets/icons/check-box.svg'
+import checkboxCheck from '../../assets/icons/check-box-check.svg'
 
 /*interface Task{
     idTarea: string;
@@ -49,6 +51,7 @@ export default function Task({task}:Props){
     const [rachaActual,setRachaActual] = useState(task.rachaActual ?? 0)
     const [rachaCiclo ,setRachaCiclo] = useState(task.rachaCiclo ?? 0)
     const [diasFaltantes, setDiasFaltantes] = useState( task.cantidadDias- (task.rachaCiclo ?? 0) )
+    const [hoyHecho, setHoyHecho] = useState (task.completadaHoy)
     const diaActual = new Date()
     //si puede hacer la racha ese ciclo ej esa semana o ya no le dan los dias
            //1. QUEDARNOS CON LAS TAREAS ACTIVAS DE ESE USUARIO
@@ -119,47 +122,42 @@ export default function Task({task}:Props){
             }else{return false}
 
     }
-    function cambiarRacha(e: React.ChangeEvent<HTMLInputElement>){
-        //VEMOS SI ESTA CHECKEADA LA TAREA DE HOY
-        const estaCheckeado = e.target.checked;
-        //SUMAR LA RACHA , LA RACHA SE EMPIEZA A MOSTRAR EN COMPLETADAS DEL DIA , SE TIENE QUE ACTUALIZAR EL RACHASEMANAL CON EL SET PARA UQE SE RENDERICE Y SI YA PASO EL CICLO(semana,mes)SE VE CON UN COLOR FUEGO ESPECIAL  
-        //VEMOS SI ETA CHECKEADO
-        if(estaCheckeado){
-            const nuevaRachaActual = (task.rachaActual )+1
-            const nuevaRachaCiclo = (task.rachaCiclo ) +1
-            //estamos poniendo el dia antes de la ultima completacion asi por si el usuario desmarca queda como ultima completacion la ultima ultima.
+    function cambiarRacha(){
+
+        if(!hoyHecho){
+            const nuevaRachaActual = (task.rachaActual ?? 0) + 1
+            const nuevaRachaCiclo = (task.rachaCiclo ?? 0) + 1
             const ultimaCompletacion = new Date().toISOString()
-            if(task.ultimaCompletacion!=null){
-                const nuevaUltimaUltimaCompletacion = task.ultimaCompletacion
-                modificarTarea(task.taskId,{ultimaUltimaCompletacion: nuevaUltimaUltimaCompletacion})
-                
-            }else{
-                
+
+            const updates: Partial<TaskInterface> = {
+                rachaActual: nuevaRachaActual,
+                completadaHoy: true,
+                ultimaCompletacion: ultimaCompletacion,
+                rachaCiclo: nuevaRachaCiclo,
+                ultimaUltimaCompletacion: task.ultimaCompletacion ?? null,
             }
-            
+
+            modificarTarea(task.taskId, updates)
             setRachaActual(nuevaRachaActual)
             setRachaCiclo(nuevaRachaCiclo)
-            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: true,ultimaCompletacion: ultimaCompletacion , rachaCiclo:nuevaRachaCiclo})
-
-            alert(rachaActual)
+            setHoyHecho(true)
+ 
         }else{
-            //SI EL USUARIO DESCHECKEA
-            const nuevaRachaActual = (rachaActual) - 1
-            const nuevaRachaCiclo = (rachaCiclo) - 1
-            if(task.ultimaUltimaCompletacion != null){
-                const nuevaCompletacion = task.ultimaUltimaCompletacion
-                modificarTarea(task.taskId,{ultimaCompletacion: nuevaCompletacion})
-            }else{
-                modificarTarea(task.taskId,{ultimaCompletacion:null})
+            const nuevaRachaActual = rachaActual - 1
+            const nuevaRachaCiclo = rachaCiclo - 1
+
+            const updates: Partial<TaskInterface> = {
+                rachaActual: nuevaRachaActual,
+                completadaHoy: false,
+                rachaCiclo: nuevaRachaCiclo,
+                ultimaCompletacion: task.ultimaUltimaCompletacion ?? null,
             }
+
             setRachaCiclo(nuevaRachaCiclo)
-            setRachaActual(nuevaRachaActual);
-            
-            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: false,ultimaCompletacion: null , rachaCiclo:nuevaRachaCiclo})
-
-
+            setRachaActual(nuevaRachaActual)
+            modificarTarea(task.taskId, updates)
+            setHoyHecho(false)
         }
-
     }
     const cantidadDiasMeta = task.cantidadDias??0
     const fuegoGrisFaltantes = Math.max(0,cantidadDiasMeta - rachaCiclo)
@@ -168,10 +166,15 @@ export default function Task({task}:Props){
         <>
             <div className="bg-white w-[66rem] h-[3rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ">
                 <div className="flex">
-                    <form>
-                        <input type="checkbox" onChange={cambiarRacha}  />
-                        <input/>
-                    </form>
+                    <button onClick={cambiarRacha}>
+                        {hoyHecho==false &&(
+                            <img src={checkbox.src}></img>
+                        )}
+                        {hoyHecho==true&&(
+                            <img src={checkboxCheck.src}></img>
+                        )}
+                        
+                    </button>
                     <p className="text-black">{task.titulo}</p>
                     <p>
                         {task.tipoRepeticion}
@@ -200,3 +203,56 @@ export default function Task({task}:Props){
         </>
     )
 }
+
+/*
+ FORM DE ACTUALIZAR RACHA:
+                     <form>
+                        <input type="checkbox" onChange={cambiarRacha} />
+                        <input/>
+                    </form>
+*/
+
+/*
+    function cambiarRacha(e: React.ChangeEvent<HTMLInputElement>){
+        //VEMOS SI ESTA CHECKEADA LA TAREA DE HOY
+        //const estaCheckeado = e.target.checked;
+        const estaCheckeado = !task.completadaHoy
+        //SUMAR LA RACHA , LA RACHA SE EMPIEZA A MOSTRAR EN COMPLETADAS DEL DIA , SE TIENE QUE ACTUALIZAR EL RACHASEMANAL CON EL SET PARA UQE SE RENDERICE Y SI YA PASO EL CICLO(semana,mes)SE VE CON UN COLOR FUEGO ESPECIAL  
+        //VEMOS SI ETA CHECKEADO
+        if(estaCheckeado){
+            const nuevaRachaActual = (task.rachaActual ?? 0 )+1
+            const nuevaRachaCiclo = (task.rachaCiclo ?? 0 ) +1
+            //estamos poniendo el dia antes de la ultima completacion asi por si el usuario desmarca queda como ultima completacion la ultima ultima.
+            const ultimaCompletacion = new Date().toISOString()
+            if(task.ultimaCompletacion!=null){
+                const nuevaUltimaUltimaCompletacion = task.ultimaCompletacion
+                modificarTarea(task.taskId,{ultimaUltimaCompletacion: nuevaUltimaUltimaCompletacion})
+                
+            }else{
+                
+            }
+            
+            setRachaActual(nuevaRachaActual)
+            setRachaCiclo(nuevaRachaCiclo)
+            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: true,ultimaCompletacion: ultimaCompletacion , rachaCiclo:nuevaRachaCiclo})
+
+        }else{
+            //SI EL USUARIO DESCHECKEA
+            const nuevaRachaActual = (rachaActual ?? 0 ) - 1
+            const nuevaRachaCiclo = (rachaCiclo ?? 0) - 1
+            if(task.ultimaUltimaCompletacion != null){
+                const nuevaCompletacion = task.ultimaUltimaCompletacion
+                modificarTarea(task.taskId,{ultimaCompletacion: nuevaCompletacion})
+            }else{
+                modificarTarea(task.taskId,{ultimaCompletacion:null})
+            }
+            setRachaCiclo(nuevaRachaCiclo)
+            setRachaActual(nuevaRachaActual);
+            
+            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: false,ultimaCompletacion: null , rachaCiclo:nuevaRachaCiclo})
+
+
+        }
+
+    }
+*/
