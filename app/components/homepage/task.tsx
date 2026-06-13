@@ -53,6 +53,8 @@ export default function Task({task}:Props){
     const [diasFaltantes, setDiasFaltantes] = useState( task.cantidadDias- (task.rachaCiclo ?? 0) )
     const [hoyHecho, setHoyHecho] = useState (task.completadaHoy)
     const diaActual = new Date()
+    const [diasExtras, setDiasExtras] = useState(0)
+
     //si puede hacer la racha ese ciclo ej esa semana o ya no le dan los dias
            //1. QUEDARNOS CON LAS TAREAS ACTIVAS DE ESE USUARIO
               //2. QUEDARNOS CON LAS TAREAS QUE SE PUEDEN HACER ESE DIA DE ESE USUARIO
@@ -161,42 +163,56 @@ export default function Task({task}:Props){
     }
     const cantidadDiasMeta = task.cantidadDias??0
     const fuegoGrisFaltantes = Math.max(0,cantidadDiasMeta - rachaCiclo)
+    if(task.rachaCiclo>task.cantidadDias){
+        const fuegoAzul = task.rachaCiclo - task.cantidadDias
+        //setDiasExtras(fuegoAzul)
+    }
     //aca calculamos los dias faltantes se pone el ?? 0 por que si la racha ciclo esta vacia se reemplaza por 0
     return(
         <>
             <div className="bg-white w-[66rem] h-[3rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ">
-                <div className="flex">
-                    <button onClick={cambiarRacha}>
-                        {hoyHecho==false &&(
-                            <img src={checkbox.src}></img>
+                <div className="flex w-full">
+                    <div className="w-[4%]">
+                        <button onClick={cambiarRacha}>
+                            {hoyHecho==false &&(
+                                <img src={checkbox.src}></img>
+                            )}
+                            {hoyHecho==true&&(
+                                <img src={checkboxCheck.src}></img>
+                            )}
+                            
+                        </button>
+                    </div>
+                    <div className="w-[35%]">
+                        <p className="text-black">
+                            {task.titulo}
+                        </p>
+                    </div>
+                    <div>
+                        {task.tipoRepeticion == "week" &&(
+                            <p className="text-black">Semanal</p>
                         )}
-                        {hoyHecho==true&&(
-                            <img src={checkboxCheck.src}></img>
+                        {task.tipoRepeticion == "month" &&(
+                            <p className="text-black">Mensual</p>
                         )}
-                        
-                    </button>
-                    <p className="text-black">{task.titulo}</p>
-                    <p>
-                        {task.tipoRepeticion}
-                    </p>
-                    <p>
-                        {task.detallesSemanal?.dias}
-                    </p>
-                    <div className="flex gap-1">
+                    </div>
+                    
+                    <div className="flex gap-1 w-[40%] justify-center">
                         {Array.from({length:rachaCiclo}).map((_,indice)=>(
                             <div key={indice}>
-                                <img className="bg-Red-50"  src={fireOrangeSvg.src}></img>
+                                <img src={fireOrangeSvg.src}></img>
                             </div>
                         ))}
                     
                         {Array.from({length:fuegoGrisFaltantes}).map((_,indice)=>(
                             <div key={indice}>
-                                <img className="bg-red-50"  src={fireGraySvg.src}></img>
+                                <img src={fireGraySvg.src}></img>
                             </div>
                         ))}
+                        
                     </div>
                     <div>
-                        <p>Dias totales de racha {rachaActual}</p>
+                        <p> {rachaActual}</p>
                     </div>
                 </div>
             </div>
