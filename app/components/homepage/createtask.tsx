@@ -84,9 +84,10 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
             mejorRacha:0,
             completadaHoy:false,
             ultimaCompletacion:null,
+            ultimaUltimaCompletacion: null,
             titulo,
             nota,
-            rachaPorTipo:0,
+            rachaCiclo:0,
             tipoRepeticion: repeatType,
             cantidadDias: repeatType === "week" ? cantidadDiasSemana : diaDelMes,
             // Si es semanal, guardamos los días checkeados y la cantidad

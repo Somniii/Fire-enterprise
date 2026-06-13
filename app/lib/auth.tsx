@@ -40,14 +40,14 @@ export interface TaskInterface{
   mejorRacha:number,
   completadaHoy: boolean,
   ultimaCompletacion: string |null,
+  ultimaUltimaCompletacion: string | null,
   titulo: string,
   nota: string,
-  rachaPorTipo:number,
   tipoRepeticion:string,
   cantidadDias: number,
   diasSemana?: string[],
   fechasMes?: string[],
-  rachaCiclo? : number,
+  rachaCiclo : number,
   
   
 }

@@ -46,8 +46,8 @@ interface Props{
 //rachaPorTipo se resetea despues de cada ciclo ejemplo es miercoles hiciste racha martes y lunes bueno rachaportipo es = 2 , se compara con el cantidadDias que calcula la cantidad de dias por mes o semana uqe ibas a hacerlo , cuando llega a ej 2/3 y le da un feedback al usuario cuanto le falta por semana o mes
 //para calcular la cantidad de veces que tenes uqe hacerlo por el mes o por la semana lo ves por la cantidadDias 
 export default function Task({task}:Props){
-    const [rachaActual,setRachaActual] = useState(task.rachaActual)
-    const [rachaCiclo ,setRachaCiclo] = useState(task.rachaCiclo ??0)
+    const [rachaActual,setRachaActual] = useState(task.rachaActual ?? 0)
+    const [rachaCiclo ,setRachaCiclo] = useState(task.rachaCiclo ?? 0)
     const [diasFaltantes, setDiasFaltantes] = useState( task.cantidadDias- (task.rachaCiclo ?? 0) )
     const diaActual = new Date()
     //si puede hacer la racha ese ciclo ej esa semana o ya no le dan los dias
@@ -74,12 +74,12 @@ export default function Task({task}:Props){
         //RESETEO SEMANAL
         if(task.tipoRepeticion === "week" && indiceHoy===0 && rachaCiclo >0){
             setRachaCiclo(0)
-            modificarTarea(task.taskId,{rachaCiclo:0})
+            //modificarTarea(task.taskId,{rachaCiclo:0})
         }
         //RESETEO MENSUAL
         if(task.tipoRepeticion === "month" && indiceMes===1 && rachaCiclo >0){
             setRachaCiclo(0)
-            modificarTarea(task.taskId,{rachaCiclo:0})
+            //modificarTarea(task.taskId,{rachaCiclo:0})
         }
 
         if(task.tipoRepeticion!=="" && task.activa===true){
@@ -97,7 +97,7 @@ export default function Task({task}:Props){
                     //Esto esta mal implementado
                     //modificarTarea(task.taskId,{rachaActual:0})
                     
-                    setRachaActual(0)
+                    //setRachaActual(0)
                 }
                 //VEMOS SI HOY ES DOMINGO
 
@@ -107,25 +107,56 @@ export default function Task({task}:Props){
         }
     },[task.taskId, task.tipoRepeticion, task.activa, task.completadaHoy, task.diasSemana, rachaCiclo, task.cantidadDias, rachaActual])
     //se desarmo task en propiedades asi no se manda siempre el cmabio a la firebase y evitas que useeffect se dispare por cualquier minimo cambio
+    function verificarDiaYaPuesto(): boolean {
+        if(task.ultimaCompletacion == null) return false
+
+        const auxUltimaCompletacion = new Date(task.ultimaCompletacion)
+        const hoy = new Date()
+        if(            auxUltimaCompletacion.getFullYear() === hoy.getFullYear() &&
+            auxUltimaCompletacion.getMonth() === hoy.getMonth() &&
+            auxUltimaCompletacion.getDate() === hoy.getDate()){
+                return true;
+            }else{return false}
+
+    }
     function cambiarRacha(e: React.ChangeEvent<HTMLInputElement>){
         //VEMOS SI ESTA CHECKEADA LA TAREA DE HOY
         const estaCheckeado = e.target.checked;
         //SUMAR LA RACHA , LA RACHA SE EMPIEZA A MOSTRAR EN COMPLETADAS DEL DIA , SE TIENE QUE ACTUALIZAR EL RACHASEMANAL CON EL SET PARA UQE SE RENDERICE Y SI YA PASO EL CICLO(semana,mes)SE VE CON UN COLOR FUEGO ESPECIAL  
         //VEMOS SI ETA CHECKEADO
         if(estaCheckeado){
-            const nuevaRachaActual = (task.rachaActual ?? 0)+1
-            const nuevaRachaCiclo = (task.rachaCiclo ?? 0) +1
+            const nuevaRachaActual = (task.rachaActual )+1
+            const nuevaRachaCiclo = (task.rachaCiclo ) +1
+            //estamos poniendo el dia antes de la ultima completacion asi por si el usuario desmarca queda como ultima completacion la ultima ultima.
             const ultimaCompletacion = new Date().toISOString()
-            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: true,ultimaCompletacion: ultimaCompletacion , rachaPorTipo:nuevaRachaCiclo})
+            if(task.ultimaCompletacion!=null){
+                const nuevaUltimaUltimaCompletacion = task.ultimaCompletacion
+                modificarTarea(task.taskId,{ultimaUltimaCompletacion: nuevaUltimaUltimaCompletacion})
+                
+            }else{
+                
+            }
+            
             setRachaActual(nuevaRachaActual)
             setRachaCiclo(nuevaRachaCiclo)
+            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: true,ultimaCompletacion: ultimaCompletacion , rachaCiclo:nuevaRachaCiclo})
+
+            alert(rachaActual)
         }else{
             //SI EL USUARIO DESCHECKEA
-            const nuevaRachaActual = (rachaActual) -0
-            const nuevaRachaCiclo = (rachaCiclo) -1
+            const nuevaRachaActual = (rachaActual) - 1
+            const nuevaRachaCiclo = (rachaCiclo) - 1
+            if(task.ultimaUltimaCompletacion != null){
+                const nuevaCompletacion = task.ultimaUltimaCompletacion
+                modificarTarea(task.taskId,{ultimaCompletacion: nuevaCompletacion})
+            }else{
+                modificarTarea(task.taskId,{ultimaCompletacion:null})
+            }
             setRachaCiclo(nuevaRachaCiclo)
             setRachaActual(nuevaRachaActual);
-            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: false,ultimaCompletacion: null , rachaPorTipo:nuevaRachaCiclo})
+            
+            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: false,ultimaCompletacion: null , rachaCiclo:nuevaRachaCiclo})
+
 
         }
 
@@ -138,7 +169,7 @@ export default function Task({task}:Props){
             <div className="bg-white w-[66rem] h-[3rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ">
                 <div className="flex">
                     <form>
-                        <input type="checkbox" onChange={cambiarRacha} />
+                        <input type="checkbox" onChange={cambiarRacha}  />
                         <input/>
                     </form>
                     <p className="text-black">{task.titulo}</p>
