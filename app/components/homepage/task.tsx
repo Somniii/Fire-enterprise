@@ -94,7 +94,9 @@ export default function Task({task}:Props){
                     return indiceDiaPermitido >= indiceHoy;
                 }).length 
                 if(cantidadDiasFaltan >diasDisponiblesRestantes){
-                    modificarTarea(task.taskId,{rachaActual:0})
+                    //Esto esta mal implementado
+                    //modificarTarea(task.taskId,{rachaActual:0})
+                    
                     setRachaActual(0)
                 }
                 //VEMOS SI HOY ES DOMINGO
@@ -105,7 +107,7 @@ export default function Task({task}:Props){
         }
     },[task.taskId, task.tipoRepeticion, task.activa, task.completadaHoy, task.diasSemana, rachaCiclo, task.cantidadDias, rachaActual])
     //se desarmo task en propiedades asi no se manda siempre el cmabio a la firebase y evitas que useeffect se dispare por cualquier minimo cambio
-    function sumarRacha(e: React.ChangeEvent<HTMLInputElement>){
+    function cambiarRacha(e: React.ChangeEvent<HTMLInputElement>){
         //VEMOS SI ESTA CHECKEADA LA TAREA DE HOY
         const estaCheckeado = e.target.checked;
         //SUMAR LA RACHA , LA RACHA SE EMPIEZA A MOSTRAR EN COMPLETADAS DEL DIA , SE TIENE QUE ACTUALIZAR EL RACHASEMANAL CON EL SET PARA UQE SE RENDERICE Y SI YA PASO EL CICLO(semana,mes)SE VE CON UN COLOR FUEGO ESPECIAL  
@@ -114,16 +116,16 @@ export default function Task({task}:Props){
             const nuevaRachaActual = (task.rachaActual ?? 0)+1
             const nuevaRachaCiclo = (task.rachaCiclo ?? 0) +1
             const ultimaCompletacion = new Date().toISOString()
-            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: true,ultimaCompletacion: ultimaCompletacion , rachaCiclo:nuevaRachaCiclo})
+            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: true,ultimaCompletacion: ultimaCompletacion , rachaPorTipo:nuevaRachaCiclo})
             setRachaActual(nuevaRachaActual)
             setRachaCiclo(nuevaRachaCiclo)
         }else{
             //SI EL USUARIO DESCHECKEA
-            const nuevaRachaActual = (task.rachaActual ?? 0)-1
-            const nuevaRachaCiclo = (task.rachaCiclo ?? 0) -1
+            const nuevaRachaActual = (rachaActual) -0
+            const nuevaRachaCiclo = (rachaCiclo) -1
             setRachaCiclo(nuevaRachaCiclo)
             setRachaActual(nuevaRachaActual);
-            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: false,ultimaCompletacion: null , rachaCiclo:nuevaRachaCiclo})
+            modificarTarea(task.taskId,{rachaActual: nuevaRachaActual ,completadaHoy: false,ultimaCompletacion: null , rachaPorTipo:nuevaRachaCiclo})
 
         }
 
@@ -136,7 +138,7 @@ export default function Task({task}:Props){
             <div className="bg-white w-[66rem] h-[3rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ">
                 <div className="flex">
                     <form>
-                        <input type="checkbox" onChange={sumarRacha} />
+                        <input type="checkbox" onChange={cambiarRacha} />
                         <input/>
                     </form>
                     <p className="text-black">{task.titulo}</p>
@@ -148,19 +150,19 @@ export default function Task({task}:Props){
                     </p>
                     <div className="flex gap-1">
                         {Array.from({length:rachaCiclo}).map((_,indice)=>(
-                            <div>
-                                <img className="bg-Red-50" key={indice} src={fireOrangeSvg.src}></img>
+                            <div key={indice}>
+                                <img className="bg-Red-50"  src={fireOrangeSvg.src}></img>
                             </div>
                         ))}
                     
                         {Array.from({length:fuegoGrisFaltantes}).map((_,indice)=>(
-                            <div>
-                                <img className="bg-red-50" key={indice} src={fireGraySvg.src}></img>
+                            <div key={indice}>
+                                <img className="bg-red-50"  src={fireGraySvg.src}></img>
                             </div>
                         ))}
                     </div>
                     <div>
-
+                        <p>Dias totales de racha {rachaActual}</p>
                     </div>
                 </div>
             </div>
