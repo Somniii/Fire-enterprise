@@ -6,13 +6,19 @@ import BarraTaskBlock from "./barraTaskBlock"
 
 export default function TaskBlock(){
     return(
-        <div  className="flex h-[49rem] w-[68rem] mx-auto flex ml-[2rem] ">
+        <div className="
+        w-full
+        max-w-7xl
+        mx-auto
+        px-4
+        md:px-6
+        lg:px-8
+        min-h-screen
+        ">
             <NotGlass>
                 <BarraTaskBlock/>
                 <TaskList/>
             </NotGlass>
         </div>
-
-        
     )
 }
