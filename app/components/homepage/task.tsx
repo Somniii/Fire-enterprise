@@ -9,6 +9,7 @@ import fireOrangeSvg from '../../assets/icons/fire-orange.svg'
 import fireGraySvg from '../../assets/icons/fire-gray.svg'
 import checkbox from '../../assets/icons/check-box.svg'
 import checkboxCheck from '../../assets/icons/check-box-check.svg'
+import fireBlue from '../../assets/icons/fire-blue.svg'
 
 /*interface Task{
     idTarea: string;
@@ -127,10 +128,15 @@ export default function Task({task}:Props){
     function cambiarRacha(){
 
         if(!hoyHecho){
-            const nuevaRachaActual = (task.rachaActual ?? 0) + 1
-            const nuevaRachaCiclo = (task.rachaCiclo ?? 0) + 1
+            
+            //Si hoy no se hizo lo prepara para subir a la nube
+            //const nuevaRachaActual = (task.rachaActual ?? 0) + 1
+            //const nuevaRachaCiclo = (task.rachaCiclo ?? 0) + 1
+            const nuevaRachaActual = rachaActual + 1
+            const nuevaRachaCiclo = rachaCiclo + 1
+            //aca deberia meter algun if que compare el valor de la bdd y que si tiene 1 menos sume 1 , la cosa es que 
+            //sube 2 valores porque task.rachaActual es el (HACER EN BULLET JOURNAL EL CICLO DE PONERLE UNOE XTRA A LA RACHA)
             const ultimaCompletacion = new Date().toISOString()
-
             const updates: Partial<TaskInterface> = {
                 rachaActual: nuevaRachaActual,
                 completadaHoy: true,
@@ -145,6 +151,8 @@ export default function Task({task}:Props){
             setHoyHecho(true)
  
         }else{
+            
+            //si hoy ya se hizo resta uno
             const nuevaRachaActual = rachaActual - 1
             const nuevaRachaCiclo = rachaCiclo - 1
 
@@ -160,13 +168,19 @@ export default function Task({task}:Props){
             modificarTarea(task.taskId, updates)
             setHoyHecho(false)
         }
+
     }
+    useEffect(()=>{
+        if(task.rachaCiclo>task.cantidadDias){
+            const fuegoAzul = task.rachaCiclo - task.cantidadDias
+            setDiasExtras(fuegoAzul)
+        }else{
+            setDiasExtras(0)
+        }
+    },[task.rachaActual])
     const cantidadDiasMeta = task.cantidadDias??0
     const fuegoGrisFaltantes = Math.max(0,cantidadDiasMeta - rachaCiclo)
-    if(task.rachaCiclo>task.cantidadDias){
-        const fuegoAzul = task.rachaCiclo - task.cantidadDias
-        //setDiasExtras(fuegoAzul)
-    }
+    const fuegoAzul = task.rachaCiclo - task.cantidadDias
     //aca calculamos los dias faltantes se pone el ?? 0 por que si la racha ciclo esta vacia se reemplaza por 0
     return(
         <>
@@ -198,15 +212,20 @@ export default function Task({task}:Props){
                     </div>
                     
                     <div className="flex gap-1 w-[40%] justify-center">
-                        {Array.from({length:rachaCiclo}).map((_,indice)=>(
+                        {Array.from({length: Math.min(rachaCiclo, cantidadDiasMeta)}).map((_,indice)=>(
                             <div key={indice}>
-                                <img src={fireOrangeSvg.src}></img>
+                                <img src={fireOrangeSvg.src} alt="fuego completado"/>
                             </div>
                         ))}
                     
                         {Array.from({length:fuegoGrisFaltantes}).map((_,indice)=>(
                             <div key={indice}>
                                 <img src={fireGraySvg.src}></img>
+                            </div>
+                        ))}
+                        {fuegoAzul>0 && Array.from({length:diasExtras}).map((_,indice)=>(
+                            <div key={indice}>
+                                <img src={fireBlue.src}></img>
                             </div>
                         ))}
                         
