@@ -39,6 +39,7 @@ export default function TaskList() {
             return esActiva && esDeHoy
         })
         setTareasMostrar(tareasFiltradas)
+        
         if(tareasMostrar.length===0){
             //alert("es nulo")
         }
