@@ -3,7 +3,7 @@ import TaskList from "./tasklist"
 import InfiniteTaskList from "./infiniteTasklist"
 import GachaPage from "@/app/gacha/page"
 import ModificarTareas from "./modificarTareas"
-
+import VerRacha from "./verRacha"
 interface Props {
     opcion: number
 }
@@ -15,6 +15,8 @@ export default function TaskBlock({ opcion }: Props) {
             {opcion === 2 && <NotGlass><InfiniteTaskList /></NotGlass>}
             {opcion === 3 && <NotGlass><ModificarTareas/></NotGlass>}
             {opcion === 4 && <GachaPage />}
+            {opcion === 6 && <VerRacha />}
+
         </div>
     )
 }
