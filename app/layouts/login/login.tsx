@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { registerWithEmail, loginWithEmail } from '../lib/auth';
-import GlassCard from '../components/styles/glasscard'; // Validá si las rutas relativas coinciden
-import ImageBackground from '../components/homepage/imagebackground';
-import LoginGoogle from '../components/LoginGoogle';
+import { registerWithEmail, loginWithEmail } from '../../lib/auth';
+import GlassCard from '../../components/styles/glasscard'; // Validá si las rutas relativas coinciden
+import ImageBackground from '../../components/homepage/imagebackground';
+import LoginGoogle from '../../components/LoginGoogle';
 import { useRouter } from 'next/navigation';
 
 export default function Login() {
