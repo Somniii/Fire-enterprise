@@ -3,6 +3,7 @@ import NotGlass from "../styles/notglass"
 import TaskList from "./tasklist"
 import Task from "./task"
 import BarraTaskBlock from "./barraTaskBlock"
+import InfiniteTaskList from "./infiniteTasklist"
 
 export default function TaskBlock(){
     return(
@@ -16,9 +17,10 @@ export default function TaskBlock(){
         min-h-screen
         ">
             <NotGlass>
-                <BarraTaskBlock/>
-                <TaskList/>
+                <InfiniteTaskList></InfiniteTaskList>
+                
             </NotGlass>
         </div>
     )
 }
+//<TaskList/>
