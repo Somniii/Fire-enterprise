@@ -19,7 +19,7 @@ export default function SimpleTask({ task }: Props) {
             <span className="text-xs text-white/40 w-16 shrink-0">
                 {task.tipoRepeticion === "week" && "Semanal"}
                 {task.tipoRepeticion === "month" && "Mensual"}
-                {task.tipoRepeticion === "" && "Siempre"}
+                {task.tipoRepeticion === "" && "Unica"}
             </span>
 
             {/* Título */}
