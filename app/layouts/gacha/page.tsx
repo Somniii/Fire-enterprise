@@ -1,9 +1,9 @@
 'use client'; // Indicamos que este componente se renderiza en el cliente (navegador)
 
 import { useEffect, useState } from 'react'; // Para manejar el estado de las monedas, el premio obtenido y la animación
-import GlassCard from '../components/styles/glasscard'; // Componente de tarjeta con efecto glassmorphism para envolver el contenido del gacha
-import ImageBackground from '../components/homepage/imagebackground'; // Componente de fondo fijo con imagen y efecto de parallax
-import { obtenerUsuarioActual, obtenerMonedasUsuario, actualizarMonedasUsuario, calcularPremioGacha, guardarPremioUsuario } from '../lib/gacha'; // Funciones para manejar la lógica del gacha y la interacción con Firebase
+import GlassCard from '../../components/styles/glasscard'; // Componente de tarjeta con efecto glassmorphism para envolver el contenido del gacha
+import ImageBackground from '../../components/homepage/imagebackground'; // Componente de fondo fijo con imagen y efecto de parallax
+import { obtenerUsuarioActual, obtenerMonedasUsuario, actualizarMonedasUsuario, calcularPremioGacha, guardarPremioUsuario } from '../../lib/gacha'; // Funciones para manejar la lógica del gacha y la interacción con Firebase
 
 export default function GachaPage() {
   const [monedas, setMonedas] = useState(100); 

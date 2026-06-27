@@ -84,11 +84,12 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
             mejorRacha:0,
             completadaHoy:false,
             ultimaCompletacion:null,
+            ultimaUltimaCompletacion: null,
             titulo,
             nota,
-            rachaPorTipo:0,
+            rachaCiclo:0,
             tipoRepeticion: repeatType,
-            cantidadDias: repeatType === "week" ? cantidadDiasSemana : diaDelMes,
+            cantidadDias: repeatType === "week" ? cantidadDiasSemana : repeatType === "month" ? diaDelMes : 0,
             // Si es semanal, guardamos los días checkeados y la cantidad
             detallesSemanal: repeatType === "week" ? {
                 cantidadDias: cantidadDiasSemana,
@@ -97,7 +98,7 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
             // Si es mensual, guardamos el día seleccionado del 1 al 30
             detallesMensual: repeatType === "month" ? {
                 cantidadDias: diaDelMes,
-                fechas: selectedDates.map(date=>date.toISOString())
+                fechas: selectedDates.map(date=>date.getDate().toString())
             } : null
         };
 /*
@@ -153,15 +154,25 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
     if(isExpanded){
         return(
             <>
-            <div className= {`bg-white w-[66rem] ml-[1rem] mt-[1.5rem] rounded-xl flex ${repeatType==="week" ? "h-[14rem] " :  repeatType==="month" ? "h-[33rem]" : "h-[8rem] " }`}>
-                <form onSubmit={handleSubmit}>
+            <div className= {`bg-white w-[66rem] ml-[1rem] mt-[1.5rem] rounded-xl p-6 flex ${repeatType==="week" ? "h-[23rem] " :  repeatType==="month" ? "h-[42rem]" : "h-[15rem] " }`}>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                     <div>
                         <input type="text"
                          placeholder="Escribe el titulo de la tarea"
                          value={titulo}
                          onChange={(e)=>setTitulo(e.target.value)}
                          required
-
+                        className="
+                            w-full
+                            rounded-lg
+                            border
+                            border-neutral-300
+                            px-4
+                            py-2
+                            focus:outline-none
+                            focus:ring-2
+                            focus:ring-orange-400
+                            "
                          >
                         </input>
                     </div>
@@ -270,10 +281,19 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
         return(
             <>
                 <div>
-                    <button className="bg-white w-[66rem] h-[3rem] ml-[1rem] mt-[1.5rem] rounded-xl hover:hover:bg-orange-100 " onClick={isClicked}>
+                    <button className="bg-white w-[66rem] 
+                        h-[3rem] 
+                        ml-[1rem] 
+                        mt-[1.5rem] 
+                        rounded-xl 
+                        hover:shadow-xl
+                        hover:scale-[1.01]
+
+                        transition-all
+                        duration-200" onClick={isClicked}>
                         <div className="flex">
                             <img src={addSvg.src}/>
-                            <p>Agregar tarea</p>
+                            <p className="text-black">Agregar tarea</p>
                         </div>
                     </button>
                 </div>
