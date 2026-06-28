@@ -16,7 +16,7 @@ export default function homepage(){
     useEffect(()=>{
         const unsubscribe = onAuthStateChanged(auth,(user)=>{
             if(!user){
-                router.push("/dashboard")
+                router.push("/layouts/login")
             }else{
                 setAuthListo(true)
             }
