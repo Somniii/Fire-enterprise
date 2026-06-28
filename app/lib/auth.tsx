@@ -22,6 +22,7 @@ export interface TaskInterface {
     diasSemana?: string[]         // legacy, usar detallesSemanal.dias
     fechasMes?: string[]          // legacy, usar detallesMensual.fechas
     cantidadCiclos?: number
+    modo:number
 }
 
 export interface UserInterface {
