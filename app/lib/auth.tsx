@@ -92,9 +92,20 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
             const nuevosCiclos = (tarea.cantidadCiclos ?? 0) + 1
             const completoElCiclo = (tarea.rachaCiclo ?? 0) >= tarea.cantidadDias
             const esPrimerCiclo = (tarea.cantidadCiclos ?? 0) === 0
-            const nuevaRachaActual = (completoElCiclo || esPrimerCiclo)
-                ? (tarea.rachaActual ?? 0) + (tarea.rachaCiclo ?? 0)
-                : 0
+
+            let nuevaRachaActual: number
+            if (esPrimerCiclo) {
+                // primer ciclo: suma igual aunque no haya completado
+                //nuevaRachaActual = (tarea.rachaActual ?? 0) + (tarea.rachaCiclo ?? 0)
+                nuevaRachaActual = tarea.rachaActual ?? 0
+            } else if (completoElCiclo) {
+                // completo el ciclo: suma los dias
+                //nuevaRachaActual = (tarea.rachaActual ?? 0) + (tarea.rachaCiclo ?? 0)
+                nuevaRachaActual = tarea.rachaActual ?? 0
+            } else {
+                // no completo y no es primer ciclo: reset total
+                nuevaRachaActual = 0
+            }
 
             await updateDoc(doc(db, "tasks", tarea.taskId), {
                 rachaCiclo: 0,
@@ -111,9 +122,15 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
             const nuevosCiclos = (tarea.cantidadCiclos ?? 0) + 1
             const completoElCiclo = (tarea.rachaCiclo ?? 0) >= tarea.cantidadDias
             const esPrimerCiclo = (tarea.cantidadCiclos ?? 0) === 0
-            const nuevaRachaActual = (completoElCiclo || esPrimerCiclo)
-                ? (tarea.rachaActual ?? 0) + (tarea.rachaCiclo ?? 0)
-                : 0
+
+            let nuevaRachaActual: number
+            if (esPrimerCiclo) {
+                nuevaRachaActual = (tarea.rachaActual ?? 0) + (tarea.rachaCiclo ?? 0)
+            } else if (completoElCiclo) {
+                nuevaRachaActual = tarea.rachaActual ?? 0
+            } else {
+                nuevaRachaActual = 0
+            }
 
             await updateDoc(doc(db, "tasks", tarea.taskId), {
                 rachaCiclo: 0,
