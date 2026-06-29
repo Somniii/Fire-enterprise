@@ -116,17 +116,6 @@ const rewardsAgrupados = Object.entries(conteo).map(([rarity, val]) => {
         <p className="text-white/45 text-xs mt-1">monedas disponibles</p>
       </div>
 
-            {/* Racha */}
-      <div className="bg-white/5 border border-white/12 rounded-2xl p-4 mb-6">
-        <p className="text-xs uppercase tracking-widest text-white/45 mb-1 flex items-center gap-1">
-          <span>🔥</span> Racha más larga
-        </p>
-        <p className="text-white text-3xl font-semibold">
-          {loading ? '—' : profile?.streak}
-        </p>
-        <p className="text-white/45 text-xs mt-1">días consecutivos</p>
-      </div>
-
       {/* Recompensas */}
       <p className="text-xs uppercase tracking-widest text-white/45 mb-3">
         Historial de recompensas
