@@ -1,104 +1,138 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, type ComponentType } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth, db } from '../../lib/firebase'; // ajustá el path a tu config
+import { auth, db } from '../../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import GlassCard from '../styles/glasscard';
+import AvatarVisual from '../avatares/visual';
+
+// AvatarVisual typings may not include avatarId in this context; cast to any to allow avatarId prop
+const Avatar = AvatarVisual as unknown as ComponentType<any>;
 
 interface Reward {
   name: string;
   quantity: number;
   rarity: string;
-  icon: string; // path a /public
+  icon: string;
 }
 
 interface UserProfile {
   displayName: string;
+  avatarId: number;
   email: string;
   coins: number;
   streak: number;
   rewards: Reward[];
 }
 
-
 const RECOMPENSAS_MOCK = {
-  Comun:       { name: 'Carbon',          rarity: 'Comun',       color: 'text-gray-400',            image: '/assets/images/carbon.png' },
-  Raro:        { name: 'Fosforo',         rarity: 'Raro',        color: 'text-yellow-400',          image: '/assets/images/fosforo.png' },
-  Epico:       { name: 'Llama',           rarity: 'Epico',       color: 'text-orange-400',          image: '/assets/images/llama.png' },
-  Legendario:  { name: 'Fénix Legendario',rarity: 'Legendario',  color: 'text-amber-500 animate-pulse', image: '/assets/images/fenix.png' },
+  Comun: { name: 'Carbon', rarity: 'Comun', color: 'text-gray-400', image: '/assets/images/carbon.png' },
+  Raro: { name: 'Fosforo', rarity: 'Raro', color: 'text-yellow-400', image: '/assets/images/fosforo.png' },
+  Epico: { name: 'Llama', rarity: 'Epico', color: 'text-orange-400', image: '/assets/images/llama.png' },
+  Legendario: { name: 'Fénix Legendario', rarity: 'Legendario', color: 'text-amber-500 animate-pulse', image: '/assets/images/fenix.png' },
 };
 
-export default function Perfil({ onClose }: { onClose: () => void }) {
-const [profile, setProfile] = useState<UserProfile | null>(null);
-const [loading, setLoading] = useState(true);
-const router = useRouter();
+export default function Perfil({ onClose }: { onClose?: () => void }) {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
 
-useEffect(() => {
+  useEffect(() => {
   const unsub = onAuthStateChanged(auth, async (user) => {
     if (!user) {
       router.push('/layouts/login');
       return;
     }
 
-    const snap = await getDoc(doc(db, 'users', user.uid));
-    if (snap.exists()) {
-      const data = snap.data();
+    setLoading(true);
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        const data = snap.data();
 
-const premiosRaw = data.premios ?? [];
-console.log('premiosRaw completo:', JSON.stringify(premiosRaw));
-const conteo: Record<string, { quantity: number; rarity: string; name: string }> = {};
+        const premiosRaw = data.premios ?? [];
+        const conteo: Record<string, { quantity: number; rarity: string; name: string }> = {};
 
-premiosRaw.forEach((p: { name: string; rarity: string }) => {
-  const key = p.rarity; // agrupar por rareza, no por nombre
-  if (conteo[key]) {
-    conteo[key].quantity += 1;
-  } else {
-    conteo[key] = { quantity: 1, rarity: p.rarity, name: p.name };
-  }
-});
+        premiosRaw.forEach((p: { name: string; rarity: string }) => {
+          const key = p.rarity;
+          if (conteo[key]) {
+            conteo[key].quantity += 1;
+          } else {
+            conteo[key] = { quantity: 1, rarity: p.rarity, name: p.name };
+          }
+        });
 
-const rewardsAgrupados = Object.entries(conteo).map(([rarity, val]) => {
-  const meta = RECOMPENSAS_MOCK[rarity as keyof typeof RECOMPENSAS_MOCK];
-  return {
-    name: meta?.name ?? val.name,
-    quantity: val.quantity,
-    rarity,
-    icon: meta?.image ?? '/assets/images/carbon.png',
-    color: meta?.color ?? '',
-  };
-});
+        const rewardsAgrupados = Object.entries(conteo).map(([rarity, val]) => {
+          const meta = RECOMPENSAS_MOCK[rarity as keyof typeof RECOMPENSAS_MOCK];
+          return {
+            name: meta?.name ?? val.name,
+            quantity: val.quantity,
+            rarity,
+            icon: meta?.image ?? '/assets/images/carbon.png',
+            color: meta?.color ?? '',
+          };
+        });
 
-      setProfile({
-        displayName: data.displayName ?? user.displayName ?? 'Usuario',
-        email: user.email ?? '',
-        coins: data.coins ?? 0,
-        streak: data.streak ?? 0,
-        rewards: rewardsAgrupados,
-      });
+        setProfile({
+          displayName: data.displayName ?? user.displayName ?? 'Usuario',
+          email: user.email ?? '',
+          coins: data.coins ?? 0,
+          streak: data.streak ?? 0,
+          rewards: rewardsAgrupados,
+          avatarId: data.avatarId ?? 1,
+        });
+      }
+    } catch (err) {
+      console.error("Error al cargar perfil:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   });
 
   return () => unsub();
+}, []); // <- sin dependencias, solo corre al montar
+
+useEffect(() => {
+  const recargar = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      setProfile(prev => prev ? {
+        ...prev,
+        displayName: data.displayName ?? user.displayName ?? prev.displayName,
+        avatarId: data.avatarId ?? prev.avatarId,
+        coins: data.coins ?? prev.coins,
+      } : prev);
+    }
+  };
+
+  window.addEventListener('focus', recargar);
+  return () => window.removeEventListener('focus', recargar);
 }, []);
 
-  const initials = profile?.displayName
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
 
   return (
     <GlassCard className="!h-auto max-w-md w-full flex flex-col">
 
       {/* Header */}
       <div className="flex items-center gap-4 mb-6 pb-6 border-b border-white/10">
-        <div className="w-14 h-14 rounded-full bg-white/15 border border-white/25 flex items-center justify-center text-white font-medium text-lg flex-shrink-0">
-          {loading ? '...' : initials}
-        </div>
+        <button 
+          onClick={() => router.push('/layouts/Ajusteperfil')} 
+          className="relative group w-14 h-14 rounded-full overflow-hidden border border-white/25 hover:border-orange-500 transition-all"
+        >
+          <Avatar avatarId={profile?.avatarId ?? 1} className="w-full h-full object-cover" />
+          {/* Un pequeño ícono de editar que aparece al pasar el mouse */}
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 text-xs text-white">
+            Editar
+          </div>
+        </button>
+        
         <div>
           <h2 className="text-white font-semibold text-lg">{profile?.displayName}</h2>
           <p className="text-white/55 text-sm">{profile?.email}</p>

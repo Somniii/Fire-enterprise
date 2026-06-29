@@ -1,8 +1,8 @@
 'use client';
 
 import Perfil from "@/app/components/perfil/perfil";
-import ImageBackground from "../../components/homepage/imagebackground"
-
+import ImageBackground from "../../components/homepage/imagebackground";
+import AvatarVisual from "@/app/components/avatares/visual"; 
 
 export default function PerfilPage() {
   return (

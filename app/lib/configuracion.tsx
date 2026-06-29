@@ -1,11 +1,14 @@
 "use client";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getAuth, updateProfile, updatePassword, signOut } from "firebase/auth";
 import { useRouter } from 'next/navigation';
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import GlassCard from '../components/styles/glasscard'; 
 import ImageBackground from '../components/homepage/imagebackground';
+import { AVATARES } from '../components/avatares/avatares';
+import { motion, AnimatePresence } from 'framer-motion';
+import { setAvatarGuardado as guardarAvatarEnStorage } from '../components/avatares/estado';
 
 export default function AjustesPerfil() {
   const router = useRouter(); // Inicializamos el router
@@ -17,16 +20,55 @@ export default function AjustesPerfil() {
   const [mensajeExito, setMensajeExito] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [avatarId, setAvatarId] = useState<number>(0); // Estado para el ID
+  const [avatarConfirmado, setAvatarConfirmado] = useState<number>(0); // Estado para el ID confirmado
+  const auth = getAuth();
+
   const handleCerrarSesion = async () => {
     try {
       const auth = getAuth();
       await signOut(auth);
-      // CORRECCIÓN: Asegurate de que esta sea la ruta exacta de tu Login
       router.push("/layouts/login"); 
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
   }
+
+
+// 2. Cargar el avatar actual del usuario al entrar a la página
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (auth.currentUser) {
+        const docSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+        if (docSnap.exists()) {
+          const id = docSnap.data().avatarId || 0;
+          setAvatarId(id);
+          setAvatarConfirmado(id);
+        }
+      }
+    };
+    fetchUserData();
+  }, [auth.currentUser]);
+
+  const seleccionarAvatar = (id: number) => {
+    setAvatarId(id);
+  }
+
+  const guardarCambiosAvatar = async () => {
+  if (!auth.currentUser) return;
+  try {
+    setLoading(true);
+    await updateDoc(doc(db, "users", auth.currentUser.uid), { avatarId: avatarId });
+    guardarAvatarEnStorage(); // Guarda en localStorage y dispara el evento de actualización
+    setAvatarConfirmado(avatarId);
+    window.dispatchEvent(new Event("avatarChanged")); // <- notifica a todos
+    setMensajeExito("¡Avatar guardado correctamente!");
+  } catch (error) {
+    setError("Error al guardar el avatar");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const cambiarNombre = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +89,7 @@ export default function AjustesPerfil() {
       try {
         await updateProfile(user, { displayName: nuevoNombre });
         const userRef = doc(db, "users", user.uid);
-        await updateDoc(userRef, { username: nuevoNombre });
+        await updateDoc(userRef, { displayName: nuevoNombre });
         
         setMensajeExito("¡Nombre actualizado con éxito! 🔥");
         setNuevoNombre(''); 
@@ -122,6 +164,64 @@ export default function AjustesPerfil() {
             {mensajeExito}
           </div>
         )}
+
+        {/* Visualización del Avatar (Carrusel) */}
+<div className="flex flex-col items-center mb-6">
+  
+  <div className="flex items-center justify-center gap-4 mb-4">
+    {/* Flecha Izquierda */}
+    <button 
+      onClick={() => {
+        const ids = Object.keys(AVATARES).map(Number);
+        const currentIndex = ids.indexOf(avatarId);
+        const newIndex = (currentIndex - 1 + ids.length) % ids.length;
+        seleccionarAvatar(ids[newIndex]);
+      }}
+      className="text-white/50 hover:text-white transition-colors text-2xl"
+    >
+      ◀
+    </button>
+
+    {/* Avatar con Animación */}
+    <div className="relative w-24 h-24 overflow-hidden rounded-full border-2 border-orange-500/50 shadow-lg">
+      <AnimatePresence mode="wait">
+        <motion.img
+          key={avatarId}
+          src={AVATARES[avatarId].public}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.2 }}
+          className="w-full h-full object-cover"
+          alt={`Avatar ${avatarId}`}
+        />
+      </AnimatePresence>
+    </div>
+
+    {/* Flecha Derecha */}
+    <button 
+      onClick={() => {
+        const ids = Object.keys(AVATARES).map(Number);
+        const currentIndex = ids.indexOf(avatarId);
+        const newIndex = (currentIndex + 1) % ids.length;
+        seleccionarAvatar(ids[newIndex]);
+      }}
+      className="text-white/50 hover:text-white transition-colors text-2xl"
+    >
+      ▶
+    </button>
+  </div>
+  
+  {/* AQUÍ VA EL BOTÓN CONDICIONAL */}
+  {avatarId !== avatarConfirmado && (
+    <button 
+      onClick={guardarCambiosAvatar}
+      className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl py-2 px-4 transition-all animate-pulse"
+    >
+      {loading ? "Guardando..." : "Confirmar nuevo Avatar"}
+    </button>
+  )}
+</div>
 
         {/* Formulario Nombre */}
         <form onSubmit={cambiarNombre} className="space-y-4 mb-6">
