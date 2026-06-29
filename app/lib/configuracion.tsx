@@ -22,7 +22,7 @@ export default function AjustesPerfil() {
       const auth = getAuth();
       await signOut(auth);
       // CORRECCIÓN: Asegurate de que esta sea la ruta exacta de tu Login
-      router.push("/dashboard"); 
+      router.push("/layouts/login"); 
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
@@ -188,7 +188,7 @@ export default function AjustesPerfil() {
           </div>
         </div>
 
-        {/* 👈 Botón de Cerrar Sesión (con estilo rojizo glass) */}
+        {/*  Botón de Cerrar Sesión (con estilo rojizo glass) */}
         <button 
     onClick={handleCerrarSesion}
     className="w-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 font-semibold rounded-xl py-2.5 transition-all backdrop-blur-md mt-4"
