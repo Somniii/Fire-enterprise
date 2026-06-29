@@ -58,6 +58,26 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
         viernes: true,
         sabado: true,
     })
+    const fechaCreacion = new Date()
+
+    // Calcula el próximo lunes a las 00:00
+    function getProximoLunes(desde: Date): string {
+        const d = new Date(desde)
+        const diaSemana = d.getDay() // 0=dom, 1=lun...
+        const diasHastaLunes = diaSemana === 1 ? 7 : (8 - diaSemana) % 7 || 7
+        d.setDate(d.getDate() + diasHastaLunes)
+        d.setHours(0, 0, 0, 0)
+        return d.toISOString()
+    }
+
+    // Calcula el próximo día 1 a las 00:00
+    function getProximoDia1(desde: Date): string {
+        const d = new Date(desde)
+        d.setMonth(d.getMonth() + 1)
+        d.setDate(1)
+        d.setHours(0, 0, 0, 0)
+        return d.toISOString()
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault(); // Evita que la página se recargue
@@ -79,7 +99,8 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
    
             activa:true,
             taskId:crypto.randomUUID(),
-            fechaCreacion:new Date().toISOString(),
+            fechaCreacion:fechaCreacion.toISOString(),
+            fechaCiclo:fechaCreacion.toISOString(),
             rachaActual:0,
             mejorRacha:0,
             completadaHoy:false,
@@ -95,12 +116,14 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
             // Si es semanal, guardamos los días checkeados y la cantidad
             detallesSemanal: repeatType === "week" ? {
                 cantidadDias: cantidadDiasSemana,
-                dias: Object.keys(diasSeleccionados).filter(key => diasSeleccionados[key as keyof typeof diasSeleccionados])
+                dias: Object.keys(diasSeleccionados).filter(key => diasSeleccionados[key as keyof typeof diasSeleccionados]),
+                finSemana: repeatType === "week" ? getProximoLunes(fechaCreacion):null
             } : null,
             // Si es mensual, guardamos el día seleccionado del 1 al 30
             detallesMensual: repeatType === "month" ? {
                 cantidadDias: diaDelMes,
-                fechas: selectedDates.map(date=>date.getDate().toString())
+                fechas: selectedDates.map(date=>date.getDate().toString()),
+                finMes: repeatType === "month" ? getProximoDia1(fechaCreacion) : null,
             } : null
         };
 /*
