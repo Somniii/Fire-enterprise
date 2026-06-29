@@ -3,6 +3,7 @@ import CreateTask from "./createtask"
 import { useState, useEffect, useCallback } from "react";
 import { obtenerTareas, TaskInterface } from "@/app/lib/auth";
 import Task from "./task"
+import BarraTaskBlock from "./barraTaskBlock";
 
 
 export default function TaskList() {
@@ -47,7 +48,9 @@ export default function TaskList() {
     
     return (
         <>
+
             <div>
+                <BarraTaskBlock></BarraTaskBlock>
                 <CreateTask onTareaCreada={cargar} />
                 {tareasMostrar.map((tarea)=>(
                     <Task

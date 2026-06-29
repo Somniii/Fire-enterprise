@@ -1,6 +1,6 @@
 export default function BarraTaskBlock(){
     return(
-        <>
+        <><div>
             <div className="
             grid
             grid-cols-4
@@ -19,6 +19,8 @@ export default function BarraTaskBlock(){
                 <p className="w-[20%]">Dias</p>
                 <p className="w-[20%]">Total</p>
             </div>
+        </div>
+
         </>
     )
 
