@@ -19,7 +19,7 @@ export const AVATARES = [
 ];
 
 export const ESTADOS = [
-    { id: 1, public: "/assets/images/estado1.png" },
-    { id: 2, public: "/assets/images/estado2.png" },
-    { id: 3, public: "/assets/images/estado3.png" },
+    { id: 0, public: "/assets/images/estado1.png" },
+    { id: 1, public: "/assets/images/estado2.png" },
+    { id: 2, public: "/assets/images/estado3.png" },
 ];

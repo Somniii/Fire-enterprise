@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { registerWithEmail, loginWithEmail } from '../../lib/auth';
-import GlassCard from '../../components/styles/glasscard'; // Validá si las rutas relativas coinciden
+import GlassCard from '../../components/styles/glasscard'; 
 import ImageBackground from '../../components/homepage/imagebackground';
 import LoginGoogle from '../../components/LoginGoogle';
 import { useRouter } from 'next/navigation';

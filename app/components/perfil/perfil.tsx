@@ -82,7 +82,7 @@ export default function Perfil({ onClose }: { onClose?: () => void }) {
           coins: data.coins ?? 0,
           streak: data.streak ?? 0,
           rewards: rewardsAgrupados,
-          avatarId: data.avatarId ?? 1,
+          avatarId: data.avatarId ?? 0,
         });
       }
     } catch (err) {
@@ -126,7 +126,7 @@ useEffect(() => {
           onClick={() => router.push('/layouts/Ajusteperfil')} 
           className="relative group w-14 h-14 rounded-full overflow-hidden border border-white/25 hover:border-orange-500 transition-all"
         >
-          <Avatar avatarId={profile?.avatarId ?? 1} className="w-full h-full object-cover" />
+          <Avatar avatarId={profile?.avatarId ?? 0} className="w-full h-full object-cover" />
           {/* Un pequeño ícono de editar que aparece al pasar el mouse */}
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 text-xs text-white">
             Editar
