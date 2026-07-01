@@ -76,7 +76,11 @@ export default function Calendar({selectedDates, setSelectedDates}:Props){
                     return(
                         <button type='button'
                             key={idx}
-                            onClick={() => handleDateClick(day)}
+                            onClick={() => {
+                            {/*Esto hace que si se toca un mes que no es el actual no pasa nada y ahorra bugs */}
+                                if (!isCurrentMonth) return;
+                                handleDateClick(day);
+                            }}
                             className={`
                                 h-10 w-10 mx-auto flex items-center justify-center rounded-full text-sm transition-all
                                 ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700'}

@@ -1,24 +1,22 @@
-import GlassCard from "../styles/glasscard"
 import NotGlass from "../styles/notglass"
 import TaskList from "./tasklist"
-import Task from "./task"
-import BarraTaskBlock from "./barraTaskBlock"
+import InfiniteTaskList from "./infiniteTasklist"
+import GachaPage from "@/app/gacha/page"
+import ModificarTareas from "./modificarTareas"
+import VerRacha from "./verRacha"
+interface Props {
+    opcion: number
+}
 
-export default function TaskBlock(){
-    return(
-        <div className="
-        w-full
-        max-w-7xl
-        mx-auto
-        px-4
-        md:px-6
-        lg:px-8
-        min-h-screen
-        ">
-            <NotGlass>
-                <BarraTaskBlock/>
-                <TaskList/>
-            </NotGlass>
+export default function TaskBlock({ opcion }: Props) {
+    return (
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 min-h-screen">
+            {opcion === 1 && <NotGlass><TaskList /></NotGlass>}
+            {opcion === 2 && <NotGlass><InfiniteTaskList /></NotGlass>}
+            {opcion === 3 && <NotGlass><ModificarTareas/></NotGlass>}
+            {opcion === 4 && <GachaPage />}
+            {opcion === 6 && <VerRacha />}
+
         </div>
     )
 }

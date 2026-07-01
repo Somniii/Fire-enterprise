@@ -55,6 +55,8 @@ export default function Task({task}:Props){
     const [hoyHecho, setHoyHecho] = useState (task.completadaHoy)
     const diaActual = new Date()
     const [diasExtras, setDiasExtras] = useState(0)
+    //Lo que hace este useState es cuando vos pasas por arriba de la tarea funcinoa como verificador para ver los dias que podes hacerla y la descripcion 
+    const [hoverTask, setHoverTask] = useState(false)
 
     //si puede hacer la racha ese ciclo ej esa semana o ya no le dan los dias
            //1. QUEDARNOS CON LAS TAREAS ACTIVAS DE ESE USUARIO
@@ -64,6 +66,8 @@ export default function Task({task}:Props){
               //3. CREAR UN ARRAY CON ESAS TAREAS PARA PONERLAS EN EL RENDER
               //4. CALCULAR QUE DIA SEMANAL MOSTRAR EJ 4 FUEGOS PQ HIZO 4 LA ANTERIOR VEZ Y EN TOTAL TIENE Q HACER 5 SI ES SEMANA , SI ES MES QUE SALGA 4/5 PQ SI UNO PONE MUCHOS DIAS IMAGINATE 24 FUEGOS QUE SEA 4/25 MEJOR
               //O MEJOR AUN QUE A PARTIR DE MAS DE 7 TAREAS TENGA OTRA VISTA QUE SE FIJE 4/8 EJ EN VEZ DE 8 FUEGOS(esto se ve cno un if(task.cantidad > 7))
+    const DIAS_ORDENADOS = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"]
+
     useEffect(()=>{
         const DIAS_ORDENADOS = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"]
 
@@ -195,22 +199,27 @@ export default function Task({task}:Props){
     }
     return(
         <>
+        <div className="                        
+        hover:shadow-xl
+        hover:scale-[1.01]
+        transition-all
+        duration-200">
             <div
-                    className="
+                    className={`
                         bg-white
                         w-[66rem]
                         h-[3rem]
                         ml-[1rem]
                         mt-[1.5rem]
-                        rounded-xl
                         flex
 
-                        hover:shadow-xl
-                        hover:scale-[1.01]
+                        ${hoverTask && (task.tipoRepeticion !== "" || task.nota !== "")
+                            ? "rounded-t-xl"
+                            : "rounded-xl"}
 
-                        transition-all
-                        duration-200
-                    "
+                    `}
+                    onMouseEnter={()=>setHoverTask(true)}
+                    onMouseLeave={()=>setHoverTask(false)}
                 >
                 <div className="flex w-full items-center">
                     <div className="w-[4%]">
@@ -278,7 +287,57 @@ export default function Task({task}:Props){
 
                     </div>
                 </div>
+
             </div>
+                {/*este condicional sirve para el hover , si la tarea es de tipo una sola vez y no yiene nota no muestra nada*/}
+                 {hoverTask && !(task.tipoRepeticion === "" && task.nota ==="") &&(
+                    <div
+                        className={`
+                                bg-white
+                                w-[66rem]
+                                h-[3rem]
+                                ml-[1rem]
+                                rounded-b-xl
+                                flex
+   
+                                ${
+                                    task.tipoRepeticion === "week"
+                                        ? "h-[5rem]"
+                                        : task.tipoRepeticion === "month"
+                                        ? "h-[6rem]"
+                                        : "h-[3rem]"
+                                }
+                                ${hoverTask ? "rounded-b-xl" : "rounded-xl"}
+                            `}
+                            
+                    onMouseEnter={()=>setHoverTask(true)}
+                    onMouseLeave={()=>setHoverTask(false)}>
+                        <div>
+                            <p className="text-black  text-lg">
+                                {task.nota}
+                            </p>
+                            {task.tipoRepeticion=="week" &&(
+                                <div className="flex">
+                                    <p>Dias semanas que podes completarla</p>
+                                    {Array.from({length:task.detallesSemanal?.dias?.length ?? 0}).map((_,indice)=>(
+                                        <p key={indice}>{DIAS_ORDENADOS[indice]}</p>
+                                    ))}
+                                </div>
+                            )}
+                            {task.tipoRepeticion=="month" &&(
+                                <div className="flex">
+                                    <p>Dias del mes que podes completarla</p>
+                                    {Array.from({length:task.detallesMensual?.fechas.length ?? 0}).map((_,indice)=>(
+                                        <span key={indice}>[ {task.detallesMensual?.fechas[indice]} ]</span>
+                                    ))}
+                                </div>
+                            )}
+                            
+                        </div>
+                    </div>
+                )}
+        </div>
+            
         </>
     )
 }
