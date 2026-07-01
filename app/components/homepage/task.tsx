@@ -250,34 +250,35 @@ export default function Task({task}:Props){
                             <p className="text-black">Mensual</p>
                         )}
                     </div>
-                    
-                        <div className="flex w-[40%] justify-center items-center">
+                        {(task.tipoRepeticion !== "" )&&(
+                            <div className="flex w-[40%] justify-center items-center">
 
-                            {cantidadDiasMeta <= 7 ? (
-                                <>
-                                    {Array.from({ length: Math.min(rachaCiclo, cantidadDiasMeta) }).map((_, indice) => (
-                                        <img key={indice} src={fireOrangeSvg.src} alt="fuego completado" />
-                                    ))}
-
-                                    {Array.from({ length: fuegoGrisFaltantes }).map((_, indice) => (
-                                        <img key={indice} src={fireGraySvg.src} alt="fuego faltante" />
-                                    ))}
-
-                                    {fuegoAzul > 0 &&
-                                        Array.from({ length: diasExtras }).map((_, indice) => (
-                                            <img key={indice} src={fireBlue.src} alt="fuego extra" />
+                                {cantidadDiasMeta <= 7 ? (
+                                    <>
+                                        {Array.from({ length: Math.min(rachaCiclo, cantidadDiasMeta) }).map((_, indice) => (
+                                            <img key={indice} src={fireOrangeSvg.src} alt="fuego completado" />
                                         ))}
-                                </>
-                            ) : (
-                                <div className="flex items-center gap-2">
-                                    <img src={fuegoResumen} className="w-5 h-5" alt="fuego" />
-                                    <p className="font-semibold text-black">
-                                        {rachaCiclo} / {cantidadDiasMeta} días
-                                    </p>
-                                </div>
-                            )}
 
-                        </div>
+                                        {Array.from({ length: fuegoGrisFaltantes }).map((_, indice) => (
+                                            <img key={indice} src={fireGraySvg.src} alt="fuego faltante" />
+                                        ))}
+
+                                        {fuegoAzul > 0 &&
+                                            Array.from({ length: diasExtras }).map((_, indice) => (
+                                                <img key={indice} src={fireBlue.src} alt="fuego extra" />
+                                            ))}
+                                    </>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <img src={fuegoResumen} className="w-5 h-5" alt="fuego" />
+                                        <p className="font-semibold text-black">
+                                            {rachaCiclo} / {cantidadDiasMeta} días
+                                        </p>
+                                    </div>
+                                )}
+
+                            </div>
+                        )}
                     <div >
                         {(task.tipoRepeticion !== "" )&&(
                             <div className="flex">

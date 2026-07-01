@@ -89,17 +89,39 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
         // 2. RESET ciclo semanal (cada domingo)
         if (tarea.tipoRepeticion === "week" && hoy.getDay() === 0 && (tarea.rachaCiclo ?? 0) > 0) {
             const nuevosCiclos = (tarea.cantidadCiclos ?? 0) + 1
-            await updateDoc(doc(db, "tasks", tarea.taskId), { rachaCiclo: 0, cantidadCiclos: nuevosCiclos })
+            const completoElCiclo = (tarea.rachaCiclo ?? 0) >= tarea.cantidadDias
+            const esPrimerCiclo = (tarea.cantidadCiclos ?? 0) === 0
+            const nuevaRachaActual = (completoElCiclo || esPrimerCiclo)
+                ? (tarea.rachaActual ?? 0) + (tarea.rachaCiclo ?? 0)
+                : 0
+
+            await updateDoc(doc(db, "tasks", tarea.taskId), {
+                rachaCiclo: 0,
+                cantidadCiclos: nuevosCiclos,
+                rachaActual: nuevaRachaActual
+            })
             tarea.rachaCiclo = 0
             tarea.cantidadCiclos = nuevosCiclos
+            tarea.rachaActual = nuevaRachaActual
         }
 
         // 3. RESET ciclo mensual (cada día 1)
         if (tarea.tipoRepeticion === "month" && hoy.getDate() === 1 && (tarea.rachaCiclo ?? 0) > 0) {
             const nuevosCiclos = (tarea.cantidadCiclos ?? 0) + 1
-            await updateDoc(doc(db, "tasks", tarea.taskId), { rachaCiclo: 0, cantidadCiclos: nuevosCiclos })
+            const completoElCiclo = (tarea.rachaCiclo ?? 0) >= tarea.cantidadDias
+            const esPrimerCiclo = (tarea.cantidadCiclos ?? 0) === 0
+            const nuevaRachaActual = (completoElCiclo || esPrimerCiclo)
+                ? (tarea.rachaActual ?? 0) + (tarea.rachaCiclo ?? 0)
+                : 0
+
+            await updateDoc(doc(db, "tasks", tarea.taskId), {
+                rachaCiclo: 0,
+                cantidadCiclos: nuevosCiclos,
+                rachaActual: nuevaRachaActual
+            })
             tarea.rachaCiclo = 0
             tarea.cantidadCiclos = nuevosCiclos
+            tarea.rachaActual = nuevaRachaActual
         }
 
         // 4. RACHA A 0 si no puede completar el ciclo (solo desde el segundo ciclo)
