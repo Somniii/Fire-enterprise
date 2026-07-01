@@ -5,8 +5,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import GlassCard from '../styles/glasscard';
 import AvatarVisual from '../avatares/visual';
+import { obtenerSobresUsuario, SOBRES_MAX_DIARIO } from '../../lib/gacha';
 
 const Avatar = AvatarVisual as unknown as ComponentType<any>;
 
@@ -35,6 +35,7 @@ const RECOMPENSAS_MOCK = {
 
 export default function Perfil({ onClose }: { onClose?: () => void }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [sobres, setSobres] = useState({ abiertosHoy: 0, disponibles: SOBRES_MAX_DIARIO });
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
@@ -84,6 +85,9 @@ export default function Perfil({ onClose }: { onClose?: () => void }) {
             avatarId: data.avatarId ?? 0,
           });
         }
+
+        const sobresData = await obtenerSobresUsuario(user.uid);
+        setSobres(sobresData);
       } catch (err) {
         console.error("Error al cargar perfil:", err);
       } finally {
@@ -109,6 +113,9 @@ export default function Perfil({ onClose }: { onClose?: () => void }) {
           coins: data.coins ?? prev.coins,
         } : prev);
       }
+
+      const sobresData = await obtenerSobresUsuario(user.uid);
+      setSobres(sobresData);
     };
 
     window.addEventListener('focus', recargar);
@@ -116,9 +123,9 @@ export default function Perfil({ onClose }: { onClose?: () => void }) {
   }, []);
 
   return (
-    <div className="w-full max-w-6xl mx-auto flex flex-col">
+    <div className="w-full max-w-6xl mx-auto flex flex-col pt-6 md:pt-10">
 
-      {/* Header + Monedas en fila en pantallas grandes */}
+      {/* Header + Monedas + Sobres en fila en pantallas grandes */}
       <div className="flex flex-col lg:flex-row gap-6 mb-6 pb-6 border-b border-white/10">
 
         {/* Header */}
@@ -150,17 +157,23 @@ export default function Perfil({ onClose }: { onClose?: () => void }) {
           <p className="text-white/45 text-xs mt-1">monedas disponibles</p>
         </div>
 
-        {/* Racha */}
+        {/* Sobres abiertos hoy */}
         <div className="bg-white/5 border border-white/12 rounded-2xl p-4 lg:w-64 shrink-0">
           <p className="text-xs uppercase tracking-widest text-white/45 mb-1 flex items-center gap-1">
-            <span>🔥</span> Racha
+            <span>✉️</span> Sobres
           </p>
           <p className="text-white text-3xl font-semibold">
-            {loading ? '—' : profile?.streak}
+            {loading ? '—' : `${sobres.abiertosHoy}/${SOBRES_MAX_DIARIO}`}
           </p>
-          <p className="text-white/45 text-xs mt-1">días seguidos</p>
+          <p className="text-white/45 text-xs mt-1">
+            {sobres.disponibles > 0
+              ? `${sobres.disponibles} disponibles hoy`
+              : 'volvé mañana por más'}
+          </p>
         </div>
+
       </div>
+      {/* ^ cierre correcto de la fila del header — antes esto seguía abierto */}
 
       {/* Recompensas */}
       <p className="text-xs uppercase tracking-widest text-white/45 mb-3">
@@ -195,6 +208,5 @@ export default function Perfil({ onClose }: { onClose?: () => void }) {
       )}
 
     </div>
-      
   );
 }
