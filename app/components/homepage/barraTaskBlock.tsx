@@ -1,7 +1,7 @@
 export default function BarraTaskBlock(){
     return(
         <div className="
-            w-[66rem]
+            w-full
             ml-[1rem]
             mt-[1.5rem]
             h-16

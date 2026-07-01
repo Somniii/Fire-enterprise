@@ -18,50 +18,39 @@ export default function TaskList() {
         cargar()
     }, [cargar])
 
+    const [tareasMostrar, setTareasMostrar] = useState<TaskInterface[]>([])
 
-    const [tareasMostrar, setTareasMostrar ] = useState<TaskInterface[]>([])
-    //hacemos un useeffect para que solo se ejecute cuando tareas cambie
-    useEffect(()=>{
+    useEffect(() => {
         const DIAS_ORDENADOS = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"]
         const diaActual = new Date()
         const nombreDiaActualSemana = DIAS_ORDENADOS[diaActual.getDay()]
         const nombreDiaActualMes = diaActual.getDate().toString()
-        const tareasFiltradas = tareas.filter(tarea =>{
+        const tareasFiltradas = tareas.filter(tarea => {
             let esDeHoy = false
-            const esActiva = tarea.activa ===true;
-            //ESTO ES SOLO SEMANA FALTA MES
+            const esActiva = tarea.activa === true;
             const diaSemanaBien = tarea.detallesSemanal?.dias.includes(nombreDiaActualSemana);
             const diaActualMesBien = tarea.detallesMensual?.fechas.includes(nombreDiaActualMes)
             const tipoSiempre = tarea.tipoRepeticion === ""
-            console.log(`compara ${tarea.detallesMensual?.fechas?.join(", ") || "Ninguno"} con ${nombreDiaActualMes}`)
-            if(diaSemanaBien || diaActualMesBien || tipoSiempre){
+            if (diaSemanaBien || diaActualMesBien || tipoSiempre) {
                 esDeHoy = true
             }
             return esActiva && esDeHoy
         })
         setTareasMostrar(tareasFiltradas)
-        
-        if(tareasMostrar.length===0){
-            //alert("es nulo")
-        }
-    }  ,[tareas]) //esto le decis que se ejecute cuando tareas cambie
-    
-    return (
-        <>
+    }, [tareas])
 
-            <div>
-                <BarraTaskBlock></BarraTaskBlock>
+    return (
+        <div className="w-full flex justify-center px-4">
+            <div className="w-full max-w-[66rem] flex flex-col">
+                <BarraTaskBlock />
                 <CreateTask onTareaCreada={cargar} />
-                {tareasMostrar.map((tarea)=>(
+                {tareasMostrar.map((tarea) => (
                     <Task
                         key={tarea.taskId}
                         task={tarea}
-                    >
-
-                    </Task>
+                    />
                 ))}
-                
             </div>
-        </>
+        </div>
     )
 }

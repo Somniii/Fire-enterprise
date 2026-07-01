@@ -62,14 +62,18 @@ export default function SimpleTask({ task, onToggleCompletada }: Props) {
                 <p className="text-black font-medium flex-1">{task.titulo}</p>
 
                 {/* Racha */}
-                <span className="flex items-center gap-1 shrink-0">
-                    <img
-                        src={hoyHecho ? fireOrangeSvg.src : fireGraySvg.src}
-                        className="w-4 h-4"
-                        alt="racha"
-                    />
-                    <p className="text-black font-semibold text-sm">{rachaActual}</p>
-                </span>
+                {task.tipoRepeticion!="" &&(
+
+                    <span className="flex items-center gap-1 shrink-0">
+                        <img
+                            src={hoyHecho ? fireOrangeSvg.src : fireGraySvg.src}
+                            className="w-4 h-4"
+                            alt="racha"
+                        />
+                        <p className="text-black font-semibold text-sm">{rachaActual}</p>
+                    </span>
+                )}
+
             
             
             

@@ -21,7 +21,7 @@ export default function LeftBar({ opcion, setOpcion }: Props) {
         }`
 
     return (
-        <div className="fixed top-0 left-0 h-screen w-64 hidden lg:flex justify-start z-20">
+        <div className="sticky top-16 h-[calc(100vh-4rem)] w-64 shrink-0 hidden lg:flex justify-start z-20">
             <NotGlass>
                 <div className="flex flex-col gap-2 p-6 w-full h-full overflow-y-auto">
                     <p className="text-xs text-white/40 uppercase tracking-widest mb-3 px-4">Menú</p>
