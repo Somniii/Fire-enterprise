@@ -1,7 +1,9 @@
 import NotGlass from "../styles/notglass"
 import TaskList from "./tasklist"
 import InfiniteTaskList from "./infiniteTasklist"
-import GachaPage from "@/app/gacha/page"
+import fireOrangeSvg from '../../assets/icons/fire-orange.svg'
+import GachaPage from '../../layouts/gacha/page'
+
 import ModificarTareas from "./modificarTareas"
 import VerRacha from "./verRacha"
 interface Props {
@@ -20,3 +22,4 @@ export default function TaskBlock({ opcion }: Props) {
         </div>
     )
 }
+
