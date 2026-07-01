@@ -15,13 +15,14 @@ import CalendarView from "./calendarview";
 
 interface Props{
     task:TaskInterface
+    onToggleCompletada?: (taskId: string, completada: boolean) => void
 }
 
 
 
 //rachaPorTipo se resetea despues de cada ciclo ejemplo es miercoles hiciste racha martes y lunes bueno rachaportipo es = 2 , se compara con el cantidadDias que calcula la cantidad de dias por mes o semana uqe ibas a hacerlo , cuando llega a ej 2/3 y le da un feedback al usuario cuanto le falta por semana o mes
 //para calcular la cantidad de veces que tenes uqe hacerlo por el mes o por la semana lo ves por la cantidadDias 
-export default function Task({task}:Props){
+export default function Task({task , onToggleCompletada}:Props){
     const [rachaActual,setRachaActual] = useState(task.rachaActual ?? 0)
     const [rachaCiclo ,setRachaCiclo] = useState(task.rachaCiclo ?? 0)
     const [diasFaltantes, setDiasFaltantes] = useState( task.cantidadDias- (task.rachaCiclo ?? 0) )
@@ -95,17 +96,6 @@ export default function Task({task}:Props){
         if(!hoyHecho){
             const ultimaCompletacion = new Date().toISOString()
 
-            if(task.tipoRepeticion === ""){
-                // Tarea de una sola vez: se completa y se desactiva
-                const updates: Partial<TaskInterface> = {
-                    completadaHoy: true,
-                    ultimaCompletacion: ultimaCompletacion,
-                    activa: false,
-                }
-                modificarTarea(task.taskId, updates)
-                setHoyHecho(true)
-                return
-            }
 
             // Tareas semanales/mensuales: lógica normal de racha
             const nuevaRachaActual = rachaActual + 1
@@ -122,6 +112,7 @@ export default function Task({task}:Props){
             setRachaActual(nuevaRachaActual)
             setRachaCiclo(nuevaRachaCiclo)
             setHoyHecho(true)
+            onToggleCompletada?.(task.taskId, true)
 
         }else{
 
@@ -152,6 +143,7 @@ export default function Task({task}:Props){
             setRachaActual(nuevaRachaActual)
             modificarTarea(task.taskId, updates)
             setHoyHecho(false)
+            onToggleCompletada?.(task.taskId, false)
         }
 
     }

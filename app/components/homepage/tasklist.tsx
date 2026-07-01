@@ -1,6 +1,6 @@
 "use client"
 import CreateTask from "./createtask"
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { obtenerTareas, TaskInterface } from "@/app/lib/auth";
 import Task from "./task"
 import BarraTaskBlock from "./barraTaskBlock";
@@ -17,6 +17,12 @@ export default function TaskList() {
     useEffect(() => {
         cargar()
     }, [cargar])
+
+    const handleToggleCompletada = useCallback((taskId: string, completada: boolean) => {
+        setTareas(prev =>
+            prev.map(t => t.taskId === taskId ? { ...t, completadaHoy: completada } : t)
+        )
+    }, [])
 
     const [tareasMostrar, setTareasMostrar] = useState<TaskInterface[]>([])
 
@@ -39,17 +45,47 @@ export default function TaskList() {
         setTareasMostrar(tareasFiltradas)
     }, [tareas])
 
+    //separamos en dos grupos en vez de un solo sort
+    const pendientes = useMemo(
+        () => tareasMostrar.filter(t => !t.completadaHoy),
+        [tareasMostrar]
+    )
+    const completadas = useMemo(
+        () => tareasMostrar.filter(t => t.completadaHoy),
+        [tareasMostrar]
+    )
+
+    const Seccion = ({ titulo, lista }: { titulo: string, lista: TaskInterface[] }) => (
+        <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+                <p className="text-xs text-white/40 uppercase tracking-widest">{titulo}</p>
+                <div className="flex-1 border-t border-white/10" />
+                <span className="text-xs text-white/30">{lista.length}</span>
+            </div>
+            {lista.length === 0 ? (
+                <p className="text-white/20 text-sm px-1">Sin tareas</p>
+            ) : (
+                <div className="flex flex-col gap-2">
+                    {lista.map(tarea => (
+                        <Task
+                            key={tarea.taskId}
+                            task={tarea}
+                            onToggleCompletada={handleToggleCompletada}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+
     return (
-        <div className="w-full flex justify-center px-4 flex-col gap-8 p-6">
-            <div className="w-full max-w-[66rem] flex flex-col">
+        <div className="w-full flex justify-center px-4 py-6">
+            <div className="w-full max-w-[66rem] flex flex-col gap-8">
                 <BarraTaskBlock />
                 <CreateTask onTareaCreada={cargar} />
-                {tareasMostrar.map((tarea) => (
-                    <Task
-                        key={tarea.taskId}
-                        task={tarea}
-                    />
-                ))}
+
+                <Seccion titulo="Pendientes" lista={pendientes} />
+                <Seccion titulo="Completadas" lista={completadas} />
             </div>
         </div>
     )

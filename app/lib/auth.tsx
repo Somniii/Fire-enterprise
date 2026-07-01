@@ -110,7 +110,7 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
 
 
         // 1. RESET completadaHoy si no es de hoy
-        if (tarea.completadaHoy && tarea.ultimaCompletacion) {
+        if (tarea.completadaHoy && tarea.ultimaCompletacion && tarea.tipoRepeticion !== "") {
             const ultimaFecha = new Date(tarea.ultimaCompletacion)
             const esDeHoy =
                 ultimaFecha.getFullYear() === hoy.getFullYear() &&

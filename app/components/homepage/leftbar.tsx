@@ -6,6 +6,9 @@ import task from '../../assets/icons/task.svg'
 import threebar from '../../assets/icons/threebar.svg'
 import fire from '../../assets/icons/fire.svg'
 import human from '../../assets/icons/human.svg'
+import profile from '../../assets/icons/profile.svg'
+import Pomodoro from "@/app/layouts/pomodoro/page";
+import pomodoroSvg from '../../assets/icons/pomodoro.svg'
 
 interface Props {
     opcion: number
@@ -40,18 +43,25 @@ export default function LeftBar({ opcion, setOpcion }: Props) {
                     </button>
 
                     <div className="border-t border-white/10 my-3" />
-
                     <button onClick={() => setOpcion(4)} className={btnClass(4)}>
+                        <img src={profile.src} className="w-6 h-6 opacity-80" />
+                        <p className="text-base font-medium">Perfil</p>
+                    </button>
+                    <button onClick={() => setOpcion(5)} className={btnClass(5)}>
+                        <img src={pomodoroSvg.src} className="w-6 h-6 opacity-80" />
+                        <p className="text-base font-medium">Pomodoro</p>
+                    </button>
+                    <button onClick={() => setOpcion(6)} className={btnClass(6)}>
                         <img src={poker.src} className="w-6 h-6 opacity-80" />
                         <p className="text-base font-medium">Gacha</p>
                     </button>
-                    <button onClick={() => setOpcion(5)} className={btnClass(5)}>
+                    <button onClick={() => setOpcion(7)} className={btnClass(7)}>
                         <img src={human.src} className="w-6 h-6 opacity-80" />
                         <p className="text-base font-medium">Personaje</p>
                     </button>
-                    <button onClick={() => setOpcion(6)} className={btnClass(6)}>
+                    <button onClick={() => setOpcion(8)} className={btnClass(8)}>
                         <img src={fire.src} className="w-6 h-6 opacity-80" />
-                        <p className="text-base font-medium">Ver Racha</p>
+                        <p className="text-base font-medium">Metricas</p>
                     </button>
                 </div>
             </NotGlass>
