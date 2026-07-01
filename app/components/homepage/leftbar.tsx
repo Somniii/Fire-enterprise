@@ -55,10 +55,6 @@ export default function LeftBar({ opcion, setOpcion }: Props) {
                         <img src={poker.src} className="w-6 h-6 opacity-80" />
                         <p className="text-base font-medium">Gacha</p>
                     </button>
-                    <button onClick={() => setOpcion(7)} className={btnClass(7)}>
-                        <img src={human.src} className="w-6 h-6 opacity-80" />
-                        <p className="text-base font-medium">Personaje</p>
-                    </button>
                     <button onClick={() => setOpcion(8)} className={btnClass(8)}>
                         <img src={fire.src} className="w-6 h-6 opacity-80" />
                         <p className="text-base font-medium">Metricas</p>

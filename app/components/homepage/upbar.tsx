@@ -1,6 +1,6 @@
 "use client"
-import { useEffect, useState } from "react"
-import { onAuthStateChanged } from "firebase/auth"
+import { useEffect, useRef, useState } from "react"
+import { onAuthStateChanged, signOut } from "firebase/auth"
 import { auth, db } from "@/app/lib/firebase"
 import { doc, getDoc } from "firebase/firestore"
 import AvatarVisual from "../avatares/visual"
@@ -13,6 +13,11 @@ export default function UpBar() {
         displayName: "",
         avatarId: 0,
     })
+
+    const [menuAbierto, setMenuAbierto] = useState(false)
+    const menuRef = useRef<HTMLDivElement>(null)
+
+
     useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (!user) return
@@ -32,6 +37,23 @@ export default function UpBar() {
         return () => unsubscribe()
     }, [])
 
+    // Cierra el menú si el usuario clickea afuera
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setMenuAbierto(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
+    }, [])
+
+    const handleCerrarSesion = async () => {
+        await signOut(auth)
+        setMenuAbierto(false)
+        router.push("/layouts/login") 
+    }
+
     return (
         <div className="fixed top-0 left-0 z-50 flex h-14 w-full items-center justify-between border-b border-neutral-300 bg-neutral-100/95 px-6 backdrop-blur-md">
 
@@ -48,13 +70,14 @@ export default function UpBar() {
             </div>
 
             {/* Perfil */}
-            <div className="flex items-center gap-3">
+            <div className="relative flex items-center gap-3" ref={menuRef}>
                 <span className="text-sm font-medium text-neutral-700">
                     {usuario.displayName}
                 </span>
 
+                <div className="relative" ref={menuRef}></div>
                 <button
-                    onClick={() => router.push("/layouts/perfil")}
+                    onClick={() => setMenuAbierto((prev) => !prev)}
                     className="
                         h-10
                         w-10
@@ -67,13 +90,37 @@ export default function UpBar() {
                         hover:scale-105
                     "
                 >
-                    <div className="flex h-full w-full items-center justify-center text-sm font-bold text-neutral-600">
-                        =avatarId={usuario.avatarId}
-                        className="w-full h-full object-cover"
-                    </div>
+                    <AvatarVisual avatarId={usuario.avatarId} className="w-full h-full object-cover" />
                 </button>
-            </div>
+                {menuAbierto && (
+                     <div className="absolute right-0 top-full z-50 mt-2 w-48 overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-lg">
+                        <button
+                            onClick={() => {
+                                setMenuAbierto(false)
+                                router.push("/layouts/perfil")
+                            }}
+                            className="block w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100"
+                        >
+                            Editar perfil
+                        </button>
 
+                        <button
+                            disabled
+                            className="flex w-full cursor-not-allowed items-center justify-between px-4 py-2 text-left text-sm text-neutral-400"
+                        >
+                            Fire Plus
+                            <span className="text-xs">Próximamente</span>
+                        </button>
+
+                        <button
+                            onClick={handleCerrarSesion}
+                            className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                        >
+                            Cerrar Sesión
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
