@@ -84,7 +84,7 @@ export default function Calendar({selectedDates, setSelectedDates}:Props){
                             className={`
                                 h-10 w-10 mx-auto flex items-center justify-center rounded-full text-sm transition-all
                                 ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700'}
-                                ${isSelected ? 'bg-blue-600 text-white font-bold shadow': 'hover:bg-gray-100'}
+                                ${isSelected ? 'bg-orange-400 text-white font-bold shadow': 'hover:bg-gray-100'}
                             `}>
                                 {format(day,`d`)}
                         </button>

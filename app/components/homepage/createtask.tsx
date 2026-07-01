@@ -179,116 +179,188 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
     if(isExpanded){
         return(
             <>
-            <div className= {`bg-white w-[66rem] ml-[1rem] mt-[1.5rem] rounded-xl p-6 flex ${repeatType==="week" ? "h-[23rem] " :  repeatType==="month" ? "h-[42rem]" : "h-[15rem] " }`}>
-                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            {/*Este div controla todo */}
+            <div className={`bg-white w-[66rem] ml-[1rem] mt-[1.5rem] rounded-xl p-6 flex gap-6 ${repeatType==="week" ? "h-[26rem] " :  repeatType==="month" ? "h-[26rem]" : "h-[17rem] " }`}>
+
+                {/*Columna izquierda: formulario */}
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5 flex-1 min-w-0">
                     <div>
-                        <input type="text"
-                         placeholder="Escribe el titulo de la tarea"
-                         value={titulo}
-                         onChange={(e)=>setTitulo(e.target.value)}
-                         required
-                        className="
-                            w-full
-                            rounded-lg
-                            border
-                            border-neutral-300
-                            px-4
-                            py-2
-                            focus:outline-none
-                            focus:ring-2
-                            focus:ring-orange-400
+                        <div>
+                            <input
+                            type="text"
+                            placeholder="Escribe el titulo de la tarea"
+                            value={titulo}
+                            onChange={(e) => setTitulo(e.target.value)}
+                            required
+                            className="
+                                w-full
+                                rounded-lg
+                                px-4
+                                py-2
+                                text-black
+                                focus:outline-none
+                                focus:ring-0
+                                focus:border-transparent
                             "
-                         >
-                        </input>
-                    </div>
-                    <div>
-                        <input type="text"
-                        placeholder="Agrega una nota"
-                        value={nota}
-                        onChange={(e)=>setNota(e.target.value)}
-                        >
-                        </input>
-                    </div> 
-                    <div className="flex">
-                        <div className="flex">
-                            <input type="radio" 
-                            name="repeat"
-                            checked={repeatType=== "week"}
-                            onChange={weeklyType}
                             />
-                            <p>Repeticion semanal</p>
                         </div>
-                        <div className="flex">
-                            <input type="radio" 
-                            name="repeat"
-                            checked={repeatType ==="month"}
-                            onChange={monthlyType}
-                            />
-                            <p>Repeticion mensual</p>
-                        </div>
-                    </div>
-                    {(repeatType==="week" || repeatType==="month")&& (
                         <div>
-                            <button onClick={cancelType}>
-                                <p>Cancelar repeticion</p>
-                            </button>
-                        </div>
-                    ) }
-                    {repeatType==="week" && (
-                        <div>
-                            <div className="flex">
-                                <p>Cantidad dias</p> 
-                            <select
-                                value={cantidadDiasSemana}
-                                onChange={(e) => setCantidadDiasSemana(Number(e.target.value))}
+                            <input type="text"
+                            placeholder="Agrega una nota"
+                            value={nota}
+                            onChange={(e)=>setNota(e.target.value)}
+                            className="
+                                w-full
+                                rounded-lg
+                                px-4
+                                py-2
+                                text-black
+                                focus:outline-none
+                                focus:ring-0
+                                focus:border-transparent
+                            "
                             >
-                                {[1,2,3,4,5,6,7].map(num => (
-                                    <option key={num} value={num}>{num}</option>
-                                ))}
-                            </select>
-                            </div>
-                            <div className="">
-                                <p>Dias que podes repetir</p>
-                                <div className="flex flex-wrap gap-4 mt-1">
-                                    {DIAS_SEMANA.map((dia)=>(
-                                        <label 
-                                        key={dia.id}
-                                        className="flex items-center gap-2 cursor-pointer text-sm select-none"
-                                        >
-                                            <input
-                                            type="checkbox"
-                                            checked={diasSeleccionados[dia.id as keyof typeof diasSeleccionados]}
-                                            onChange={()=>handleDiaChange(dia.id as keyof typeof diasSeleccionados)}
-                                            >
-                                                
-                                            </input>
-                                            <p>{dia.nombre}</p>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                    </div>
-                    )}
-                    {repeatType==="month" &&(
-                        <div>
-                                <MyCalendar
-                                selectedDates={selectedDates}
-                                setSelectedDates={setSelectedDates}
-                                 />
-                                <p>Cantidad dias</p>
+                            </input>
+                        </div> 
+
+                        <div className="flex gap-2 bg-neutral-100 p-1 rounded-lg w-fit mt-4">
+                            <label
+                                className={`
+                                    flex items-center justify-center
+                                    px-4 py-2
+                                    rounded-md
+                                    text-sm font-medium
+                                    cursor-pointer
+                                    transition-all duration-200
+                                    ${repeatType === ""
+                                        ? "bg-orange-400 text-white shadow-sm"
+                                        : "text-neutral-600 hover:bg-neutral-200"
+                                    }
+                                `}
+                            >
+                                <input
+                                    type="radio"
+                                    name="repeat"
+                                    checked={repeatType === ""}
+                                    onChange={cancelType}
+                                    className="hidden"
+                                />
+                                Sin repetición
+                            </label>
+
+                            <label
+                                className={`
+                                    flex items-center justify-center
+                                    px-4 py-2
+                                    rounded-md
+                                    text-sm font-medium
+                                    cursor-pointer
+                                    transition-all duration-200
+                                    ${repeatType === "week"
+                                        ? "bg-orange-400 text-white shadow-sm"
+                                        : "text-neutral-600 hover:bg-neutral-200"
+                                    }
+                                `}
+                            >
+                                <input
+                                    type="radio"
+                                    name="repeat"
+                                    checked={repeatType === "week"}
+                                    onChange={weeklyType}
+                                    className="hidden"
+                                />
+                                Semanal
+                            </label>
+
+                            <label
+                                className={`
+                                    flex items-center justify-center
+                                    px-4 py-2
+                                    rounded-md
+                                    text-sm font-medium
+                                    cursor-pointer
+                                    transition-all duration-200
+                                    ${repeatType === "month"
+                                        ? "bg-orange-400 text-white shadow-sm"
+                                        : "text-neutral-600 hover:bg-neutral-200"
+                                    }
+                                `}
+                            >
+                                <input
+                                    type="radio"
+                                    name="repeat"
+                                    checked={repeatType === "month"}
+                                    onChange={monthlyType}
+                                    className="hidden"
+                                />
+                                Mensual
+                            </label>
+                        </div>
+
+                        {repeatType==="week" && (
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-3 mt-4">
+                                <p className="text-sm font-medium text-neutral-700">Cantidad dias</p>
                                 <select
-                                    value={diaDelMes}
-                                    onChange={(e)=> setDiaDelMes(Number(e.target.value))}
+                                    value={cantidadDiasSemana}
+                                    onChange={(e) => setCantidadDiasSemana(Number(e.target.value))}
+                                    className="
+                                        rounded-lg
+                                        border
+                                        border-neutral-300
+                                        px-3
+                                        py-1.5
+                                        text-sm
+                                        text-black
+                                        focus:outline-none
+                                        focus:ring-2
+                                        focus:ring-orange-400
+                                    "
                                 >
-                                    {opciones.map((num)=>(
-                                        <option key={num} value={num}>
-                                            {num}
-                                        </option>
+                                    {[1,2,3,4,5,6,7].map(num => (
+                                        <option key={num} value={num}>{num} día{num > 1 ? "s" : ""}</option>
                                     ))}
                                 </select>
+                            </div>
+
+                            <div>
+                                <p className="text-sm font-medium text-neutral-700 mb-2">Días que podés repetir</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {DIAS_SEMANA.map((dia) => {
+                                        const seleccionado = diasSeleccionados[dia.id as keyof typeof diasSeleccionados]
+                                        return (
+                                            <label
+                                                key={dia.id}
+                                                className={`
+                                                    px-3 py-1.5
+                                                    rounded-full
+                                                    text-sm font-medium
+                                                    cursor-pointer
+                                                    select-none
+                                                    transition-all duration-200
+                                                    ${seleccionado
+                                                        ? "bg-orange-400 text-white shadow-sm"
+                                                        : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                                                    }
+                                                `}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={seleccionado}
+                                                    onChange={() => handleDiaChange(dia.id as keyof typeof diasSeleccionados)}
+                                                    className="hidden"
+                                                />
+                                                {dia.nombre.slice(0, 3)}
+                                            </label>
+                                        )
+                                    })}
+                                </div>
+                            </div>
                         </div>
-                    )}
-                    <div className="mt-4 flex gap-2">
+                        )}
+                    </div>
+
+                    <div className="mt-auto flex gap-2">
                         <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600" type="submit">
                             Aceptar
                         </button>
@@ -297,6 +369,39 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
                         </button>
                     </div>
                 </form>
+
+                {/*Columna derecha: calendario, solo si es mensual */}
+                {repeatType==="month" && (
+                    <div className="flex-shrink-0 w-[22rem] border-l border-neutral-200 pl-6">
+                        <MyCalendar
+                        selectedDates={selectedDates}
+                        setSelectedDates={setSelectedDates}
+                        />
+                        <p className="text-sm font-medium text-neutral-700 mt-3 mb-1">Cantidad días</p>
+                        <select
+                            value={diaDelMes}
+                            onChange={(e)=> setDiaDelMes(Number(e.target.value))}
+                            className="
+                                rounded-lg
+                                border
+                                border-neutral-300
+                                px-3
+                                py-1.5
+                                text-sm
+                                text-black
+                                focus:outline-none
+                                focus:ring-2
+                                focus:ring-orange-400
+                            "
+                        >
+                            {opciones.map((num)=>(
+                                <option key={num} value={num}>
+                                    {num}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
 
             </div>
             </>

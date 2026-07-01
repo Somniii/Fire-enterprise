@@ -224,15 +224,14 @@ export default function Task({task}:Props){
                     onMouseLeave={()=>setHoverTask(false)}
                 >
                 <div className="flex w-full items-center">
-                    <div className="w-[4%]">
-                        <button onClick={cambiarRacha}>
+                    <div className="w-[4%] flex justify-center items-center">
+                        <button onClick={cambiarRacha} className="flex items-center justify-center">
                             {hoyHecho==false &&(
-                                <img src={checkbox.src}></img>
+                                <img src={checkbox.src} className="w-5 h-5" alt="check pendiente" />
                             )}
                             {hoyHecho==true&&(
-                                <img src={checkboxCheck.src}></img>
+                                <img src={checkboxCheck.src} className="w-5 h-5" alt="check completado" />
                             )}
-                            
                         </button>
                     </div>
                     <div className="w-[35%]">
@@ -297,62 +296,79 @@ export default function Task({task}:Props){
 
             </div>
                 {/*este condicional sirve para el hover , si la tarea es de tipo una sola vez y no yiene nota no muestra nada*/}
-                 {hoverTask && !(task.tipoRepeticion === "" && task.nota ==="") &&(
+                {hoverTask && !(task.tipoRepeticion === "" && task.nota ==="") &&(
                     <div
                         className={`
                                 bg-white
                                 w-[66rem]
-                                h-[3rem]
                                 ml-[1rem]
                                 rounded-b-xl
                                 flex
-   
+                                px-6
+                                py-3
+
                                 ${
                                     task.tipoRepeticion === "week"
                                         ? "h-[5rem]"
                                         : task.tipoRepeticion === "month"
-                                        ? "h-[10rem]"
+                                        ? "h-[12rem]"
                                         : "h-[2rem]"
                                 }
-                                ${hoverTask ? "rounded-b-xl" : "rounded-xl"}
                             `}
-                            
-                    onMouseEnter={()=>setHoverTask(true)}
-                    onMouseLeave={()=>setHoverTask(false)}>
-                        <div>
+                        onMouseEnter={()=>setHoverTask(true)}
+                        onMouseLeave={()=>setHoverTask(false)}
+                    >
+                        <div className="w-full">
 
                             {task.tipoRepeticion=="week" &&(
-                                <div className="flex">
-                                    <p>Dias semanas que podes completarla</p>
-                                    {Array.from({length:task.detallesSemanal?.dias?.length ?? 0}).map((_,indice)=>(
-                                        <p key={indice}>{DIAS_ORDENADOS[indice]}</p>
-                                    ))}
-                                <p className="text-black  text-lg">
-                                {task.nota}
-                                </p>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-sm font-medium text-neutral-500">Días de repetición:</p>
+                                        <div className="flex gap-1.5">
+                                            {Array.from({length:task.detallesSemanal?.dias?.length ?? 0}).map((_,indice)=>(
+                                                <span
+                                                    key={indice}
+                                                    className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-medium"
+                                                >
+                                                    {DIAS_ORDENADOS[indice]}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    {task.nota && (
+                                        <p className="text-black text-sm">{task.nota}</p>
+                                    )}
                                 </div>
                             )}
+
                             {task.tipoRepeticion == "month" && (
-                                <div className="flex gap-2 flex-wrap">
-                                    <p>Días del mes que podés completarla:</p>
+                                <div className="flex gap-8">
+                                    <div className="w-[40%] space-y-1">
+                                        <p className="text-sm font-medium text-neutral-500">Nota:</p>
+                                        {task.nota ? (
+                                            <p className="text-black text-sm">{task.nota}</p>
+                                        ) : (
+                                            <p className="text-neutral-400 text-sm italic">Sin nota</p>
+                                        )}
+                                    </div>
+
+                                    <div className="flex-1 space-y-1">
+                                        <p className="text-sm font-medium text-neutral-500">Días del mes que podés completarla:</p>
                                         <CalendarView
                                             fechas={
                                                 task.detallesMensual?.fechas.map(Number) ?? []
                                             }
                                         />
-                                    <p className="text-black  text-lg">
+                                    </div>
+                                </div>
+                            )}
+
+                            {task.tipoRepeticion=="" && (
+                                <p className="text-black text-sm">
                                     {task.nota}
-                                     </p>
-                                </div>
+                                </p>
                             )}
-                            {task.tipoRepeticion==""&&(
-                                <div>
-                                    <p>
-                                        {task.nota}
-                                    </p>
-                                </div>
-                            )}
-                                                    
+
                         </div>
                     </div>
                 )}
