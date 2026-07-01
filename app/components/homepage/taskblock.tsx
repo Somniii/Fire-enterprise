@@ -21,7 +21,7 @@ export default function TaskBlock({ opcion }: Props) {
             {opcion === 4 && <Perfil/>}
             {opcion === 5 && <Pomodoro/>}
             {opcion === 6 && <GachaPage />}
-            {opcion === 8 && <VerRacha />}
+            {opcion === 8 && <NotGlass><VerRacha /></NotGlass>}
 
         </div>
     )
