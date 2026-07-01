@@ -6,7 +6,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import AvatarVisual from '../avatares/visual';
-import { obtenerSobresUsuario, SOBRES_MAX_DIARIO } from '../../lib/gacha';
+import { obtenerSobresUsuario, SOBRES_MAX_DIARIO, venderRecompensa, obtenerPrecioVenta } from '../../lib/gacha';
 
 const Avatar = AvatarVisual as unknown as ComponentType<any>;
 
@@ -24,6 +24,7 @@ interface UserProfile {
   coins: number;
   streak: number;
   rewards: Reward[];
+  tieneMono: boolean;
 }
 
 const RECOMPENSAS_MOCK = {
@@ -31,14 +32,61 @@ const RECOMPENSAS_MOCK = {
   Raro: { name: 'Fosforo', rarity: 'Raro', color: 'text-yellow-400', image: '/assets/images/fosforo.png' },
   Epico: { name: 'Llama', rarity: 'Epico', color: 'text-orange-400', image: '/assets/images/llama.png' },
   Legendario: { name: 'Fénix Legendario', rarity: 'Legendario', color: 'text-amber-500 animate-pulse', image: '/assets/images/fenix.png' },
+  Mono: { name: 'Mono Místico', rarity: 'Mono', color: 'text-purple-400 animate-pulse', image: '/assets/images/mono.png' },
 };
 
 export default function Perfil({ onClose }: { onClose?: () => void }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [sobres, setSobres] = useState({ abiertosHoy: 0, disponibles: SOBRES_MAX_DIARIO });
   const [loading, setLoading] = useState(true);
+  const [vendiendo, setVendiendo] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+
+  const cargarPerfil = async (uid: string) => {
+    const snap = await getDoc(doc(db, 'users', uid));
+    if (snap.exists()) {
+      const data = snap.data();
+
+      const premiosRaw = data.premios ?? [];
+      const conteo: Record<string, { quantity: number; rarity: string; name: string }> = {};
+      let tieneMono = false;
+
+      premiosRaw.forEach((p: { name: string; rarity: string }) => {
+        if (p.rarity === 'Mono') {
+          tieneMono = true;
+          return;
+        }
+        const key = p.rarity;
+        if (conteo[key]) {
+          conteo[key].quantity += 1;
+        } else {
+          conteo[key] = { quantity: 1, rarity: p.rarity, name: p.name };
+        }
+      });
+
+      const rewardsAgrupados = Object.entries(conteo).map(([rarity, val]) => {
+        const meta = RECOMPENSAS_MOCK[rarity as keyof typeof RECOMPENSAS_MOCK];
+        return {
+          name: meta?.name ?? val.name,
+          quantity: val.quantity,
+          rarity,
+          icon: meta?.image ?? '/assets/images/carbon.png',
+          color: meta?.color ?? '',
+        };
+      });
+
+      setProfile({
+        displayName: data.displayName ?? auth.currentUser?.displayName ?? 'Usuario',
+        email: auth.currentUser?.email ?? '',
+        coins: data.coins ?? 0,
+        streak: data.streak ?? 0,
+        rewards: rewardsAgrupados,
+        avatarId: data.avatarId ?? 0,
+        tieneMono,
+      });
+    }
+  };
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -49,43 +97,7 @@ export default function Perfil({ onClose }: { onClose?: () => void }) {
 
       setLoading(true);
       try {
-        const snap = await getDoc(doc(db, 'users', user.uid));
-        if (snap.exists()) {
-          const data = snap.data();
-
-          const premiosRaw = data.premios ?? [];
-          const conteo: Record<string, { quantity: number; rarity: string; name: string }> = {};
-
-          premiosRaw.forEach((p: { name: string; rarity: string }) => {
-            const key = p.rarity;
-            if (conteo[key]) {
-              conteo[key].quantity += 1;
-            } else {
-              conteo[key] = { quantity: 1, rarity: p.rarity, name: p.name };
-            }
-          });
-
-          const rewardsAgrupados = Object.entries(conteo).map(([rarity, val]) => {
-            const meta = RECOMPENSAS_MOCK[rarity as keyof typeof RECOMPENSAS_MOCK];
-            return {
-              name: meta?.name ?? val.name,
-              quantity: val.quantity,
-              rarity,
-              icon: meta?.image ?? '/assets/images/carbon.png',
-              color: meta?.color ?? '',
-            };
-          });
-
-          setProfile({
-            displayName: data.displayName ?? user.displayName ?? 'Usuario',
-            email: user.email ?? '',
-            coins: data.coins ?? 0,
-            streak: data.streak ?? 0,
-            rewards: rewardsAgrupados,
-            avatarId: data.avatarId ?? 0,
-          });
-        }
-
+        await cargarPerfil(user.uid);
         const sobresData = await obtenerSobresUsuario(user.uid);
         setSobres(sobresData);
       } catch (err) {
@@ -103,17 +115,7 @@ export default function Perfil({ onClose }: { onClose?: () => void }) {
       const user = auth.currentUser;
       if (!user) return;
 
-      const snap = await getDoc(doc(db, 'users', user.uid));
-      if (snap.exists()) {
-        const data = snap.data();
-        setProfile(prev => prev ? {
-          ...prev,
-          displayName: data.displayName ?? user.displayName ?? prev.displayName,
-          avatarId: data.avatarId ?? prev.avatarId,
-          coins: data.coins ?? prev.coins,
-        } : prev);
-      }
-
+      await cargarPerfil(user.uid);
       const sobresData = await obtenerSobresUsuario(user.uid);
       setSobres(sobresData);
     };
@@ -121,6 +123,23 @@ export default function Perfil({ onClose }: { onClose?: () => void }) {
     window.addEventListener('focus', recargar);
     return () => window.removeEventListener('focus', recargar);
   }, []);
+
+  const handleVender = async (rarity: string) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    setVendiendo(rarity);
+    try {
+      const precio = await venderRecompensa(user.uid, rarity);
+      await cargarPerfil(user.uid);
+      alert(`Vendiste 1 recompensa por ${precio} monedas 🪙`);
+    } catch (err: any) {
+      console.error("Error al vender:", err);
+      alert(err?.message ?? "No se pudo vender la recompensa");
+    } finally {
+      setVendiendo(null);
+    }
+  };
 
   return (
     <div className="w-full max-w-6xl mx-auto flex flex-col pt-6 md:pt-10">
@@ -173,7 +192,6 @@ export default function Perfil({ onClose }: { onClose?: () => void }) {
         </div>
 
       </div>
-      {/* ^ cierre correcto de la fila del header — antes esto seguía abierto */}
 
       {/* Recompensas */}
       <p className="text-xs uppercase tracking-widest text-white/45 mb-3">
@@ -182,28 +200,68 @@ export default function Perfil({ onClose }: { onClose?: () => void }) {
 
       {loading ? (
         <p className="text-white/50 text-sm text-center py-4">Cargando...</p>
-      ) : !profile?.rewards || profile.rewards.length === 0 ? (
-        <p className="text-white/40 text-sm text-center py-4">Sin recompensas aún</p>
       ) : (
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5">
-          {profile.rewards.map((reward, i) => (
-            <div
-              key={i}
-              className="bg-white/5 border border-white/10 rounded-2xl p-3 flex flex-col items-center gap-2"
-            >
+
+          {/* Objeto misterioso: Mono, bloqueado hasta que salga en el gacha */}
+          {!profile?.tieneMono ? (
+            <div className="bg-white/5 border border-dashed border-white/15 rounded-2xl p-3 flex flex-col items-center gap-2 relative overflow-hidden">
+              <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center text-xl">
+                🔒
+              </div>
+              <span className="text-white/50 text-xs font-medium">???</span>
+              <span className="text-white/30 text-[10px] text-center">Objeto misterioso</span>
+            </div>
+          ) : (
+            <div className="bg-white/5 border border-purple-400/30 rounded-2xl p-3 flex flex-col items-center gap-2">
               <img
-                src={reward.icon}
-                alt={reward.name}
+                src={RECOMPENSAS_MOCK.Mono.image}
+                alt={RECOMPENSAS_MOCK.Mono.name}
                 className="w-11 h-11 rounded-xl object-contain"
                 onError={(e) => (e.currentTarget.src = '/assets/images/placeholder.png')}
               />
-              <span className="text-white/80 text-xs font-medium">{reward.name}</span>
-              <span className="text-white text-sm font-medium bg-white/12 rounded-full px-2.5 py-0.5">
-                x{reward.quantity}
-              </span>
-              <span className="text-white/45 text-xs text-center">{reward.rarity}</span>
+              <span className={`text-xs font-medium ${RECOMPENSAS_MOCK.Mono.color}`}>{RECOMPENSAS_MOCK.Mono.name}</span>
+              <span className="text-white/45 text-[10px] text-center">Objeto de colección</span>
             </div>
-          ))}
+          )}
+
+          {profile?.rewards?.map((reward, i) => {
+            const precio = obtenerPrecioVenta(reward.rarity);
+            return (
+              <div
+                key={i}
+                className="bg-white/5 border border-white/10 rounded-2xl p-3 flex flex-col items-center gap-2"
+              >
+                <img
+                  src={reward.icon}
+                  alt={reward.name}
+                  className="w-11 h-11 rounded-xl object-contain"
+                  onError={(e) => (e.currentTarget.src = '/assets/images/placeholder.png')}
+                />
+                <span className="text-white/80 text-xs font-medium">{reward.name}</span>
+                <span className="text-white text-sm font-medium bg-white/12 rounded-full px-2.5 py-0.5">
+                  x{reward.quantity}
+                </span>
+                <span className="text-white/45 text-xs text-center">{reward.rarity}</span>
+
+                {precio !== null && (
+                  <button
+                    onClick={() => handleVender(reward.rarity)}
+                    disabled={vendiendo === reward.rarity}
+                    className="mt-1 w-full text-[10px] bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/25 text-orange-300 rounded-lg py-1 transition-all disabled:opacity-40"
+                  >
+                    {vendiendo === reward.rarity ? 'Vendiendo...' : `Vender · ${precio} 🪙`}
+                  </button>
+                )}
+              </div>
+            );
+          })}
+
+          {(!profile?.rewards || profile.rewards.length === 0) && (
+            <p className="text-white/40 text-sm col-span-full text-center py-2">
+              Sin recompensas todavía — probá suerte en el Altar del Fuego
+            </p>
+          )}
         </div>
       )}
 

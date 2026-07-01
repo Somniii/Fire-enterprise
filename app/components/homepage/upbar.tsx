@@ -7,7 +7,11 @@ import AvatarVisual from "../avatares/visual"
 import fireSvg from "../../assets/icons/fire.svg"
 import { useRouter } from "next/navigation"
 
-export default function UpBar() {
+interface Props {
+    onInicio?: () => void // <-- nuevo: se llama cuando ya estás parado en homepage, para resetear la vista interna
+}
+
+export default function UpBar({ onInicio }: Props) {
     const router = useRouter()
     const [usuario, setUsuario] = useState({
         displayName: "",
@@ -54,20 +58,22 @@ export default function UpBar() {
         router.push("/layouts/login") 
     }
 
+     const handleLogoClick = () => {
+        router.push("/layouts/homepage") // navega si estás en otra página (ej. Ajustes de perfil)
+        onInicio?.() // si ya estás en homepage, esto resetea la vista a "Tareas"
+    }
+
     return (
         <div className="fixed top-0 left-0 z-50 flex h-14 w-full items-center justify-between border-b border-neutral-300 bg-neutral-100/95 px-6 backdrop-blur-md">
 
             {/* Logo */}
-            <div className="flex items-center gap-3">
-                <img
-                    src={fireSvg.src}
-                    alt="Fire"
-                    className="h-8 w-8"
-                />
-                <h1 className="text-2xl font-bold text-neutral-800">
-                    Fire
-                </h1>
-            </div>
+            <button
+                onClick={handleLogoClick}
+                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
+                <img src={fireSvg.src} alt="Fire" className="h-8 w-8" />
+                <h1 className="text-2xl font-bold text-neutral-800">Fire</h1>
+            </button>
 
             {/* Perfil */}
             <div className="relative flex items-center gap-3" ref={menuRef}>

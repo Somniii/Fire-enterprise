@@ -335,8 +335,8 @@ const crearDatosIniciales = async (uid: string, email: string | null, username: 
         email,
         username,
         coins: 100,
-        level: 1,
-        xp: 0,
+        avatarId: 0,
+        avataresDesbloqueados: [0], 
         createdAt: new Date().toISOString()
     })
 }
