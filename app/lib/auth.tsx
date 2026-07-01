@@ -46,6 +46,13 @@ export const crearTarea = async (task: TaskInterface) => {
     })
 }
 
+export const modificarTarea = async (taskId: string, cambios: Partial<TaskInterface>) => {
+    const currentUser = auth.currentUser
+    if (!currentUser) throw new Error("No hay usuario logueado")
+
+    await updateDoc(doc(db, "tasks", taskId), { ...cambios })
+}
+
 export const obtenerTareas = async (): Promise<TaskInterface[]> => {
     const currentUser = await new Promise<import("firebase/auth").User | null>((resolve) => {
         const unsub = onAuthStateChanged(auth, (user) => {
