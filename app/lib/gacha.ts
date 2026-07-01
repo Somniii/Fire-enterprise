@@ -64,3 +64,59 @@ export const guardarPremioUsuario = async (userId: string, premio: any) => {
       console.error("Usuario no encontrado en la base de datos");
     }           
     };
+
+    // ── LÍMITE DIARIO DE SOBRES ──────────────────────────────────────────────
+
+export const SOBRES_MAX_DIARIO = 3;
+
+// Compara si una fecha ISO guardada corresponde al mismo día calendario que hoy (hora local)
+function esMismoDia(fechaIso: string | null): boolean {
+    if (!fechaIso) return false;
+    const fecha = new Date(fechaIso);
+    const hoy = new Date();
+    return (
+        fecha.getFullYear() === hoy.getFullYear() &&
+        fecha.getMonth() === hoy.getMonth() &&
+        fecha.getDate() === hoy.getDate()
+    );
+}
+
+// Trae cuántos sobres abrió el usuario hoy. Si el último sobre fue en un día
+// distinto, resetea el contador en Firestore automáticamente (medianoche local).
+export const obtenerSobresUsuario = async (
+    userId: string
+): Promise<{ abiertosHoy: number; disponibles: number }> => {
+    const userRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userRef);
+
+    if (!userDoc.exists()) {
+        console.error("Usuario no encontrado en la base de datos");
+        return { abiertosHoy: 0, disponibles: SOBRES_MAX_DIARIO };
+    }
+
+    const data = userDoc.data();
+    const ultimaFecha = data.fechaUltimoSobre ?? null;
+
+    if (!esMismoDia(ultimaFecha)) {
+        // Cambió el día: reseteamos el contador en la base si hacía falta
+        if (data.sobresAbiertosHoy && data.sobresAbiertosHoy > 0) {
+            await updateDoc(userRef, { sobresAbiertosHoy: 0 });
+        }
+        return { abiertosHoy: 0, disponibles: SOBRES_MAX_DIARIO };
+    }
+
+    const abiertosHoy = data.sobresAbiertosHoy ?? 0;
+    return {
+        abiertosHoy,
+        disponibles: Math.max(0, SOBRES_MAX_DIARIO - abiertosHoy),
+    };
+};
+
+// Registra que el usuario abrió un sobre. Se llama DESPUÉS de una tirada exitosa.
+export const registrarSobreAbierto = async (userId: string, abiertosHoyActual: number) => {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+        sobresAbiertosHoy: abiertosHoyActual + 1,
+        fechaUltimoSobre: new Date().toISOString(),
+    });
+};

@@ -1,8 +1,8 @@
-//HAY POCAS COSAS OPCIONAL PERO VOY A MARCAR MUCHAS PARA EMPEZAR A TRABAJAR DE A POCO
+
 "use client"
 import { auth } from "@/app/lib/firebase";
 import { TaskInterface } from "@/app/lib/auth";
-import { modificarTarea } from "@/app/lib/auth";
+import { modificarTarea, sumarMonedas } from "@/app/lib/auth"; // <-- agregado sumarMonedas
 import {useState , useEffect} from "react"
 import fireSvg from '../../assets/icons/fire.svg'
 import fireOrangeSvg from '../../assets/icons/fire-orange.svg'
@@ -18,7 +18,7 @@ interface Props{
     onToggleCompletada?: (taskId: string, updates: Partial<TaskInterface>) => void
 }
 
-
+const MONEDAS_POR_TAREA = 10 
 
 //rachaPorTipo se resetea despues de cada ciclo ejemplo es miercoles hiciste racha martes y lunes bueno rachaportipo es = 2 , se compara con el cantidadDias que calcula la cantidad de dias por mes o semana uqe ibas a hacerlo , cuando llega a ej 2/3 y le da un feedback al usuario cuanto le falta por semana o mes
 //para calcular la cantidad de veces que tenes uqe hacerlo por el mes o por la semana lo ves por la cantidadDias 
@@ -32,7 +32,6 @@ export default function Task({task , onToggleCompletada}:Props){
     const [diasExtras, setDiasExtras] = useState(0)
     //Lo que hace este useState es cuando vos pasas por arriba de la tarea funcinoa como verificador para ver los dias que podes hacerla y la descripcion 
     const [hoverTask, setHoverTask] = useState(false)
-
     //si puede hacer la racha ese ciclo ej esa semana o ya no le dan los dias
            //1. QUEDARNOS CON LAS TAREAS ACTIVAS DE ESE USUARIO
               //2. QUEDARNOS CON LAS TAREAS QUE SE PUEDEN HACER ESE DIA DE ESE USUARIO
@@ -96,7 +95,6 @@ export default function Task({task , onToggleCompletada}:Props){
 
         if(!hoyHecho){
             const ultimaCompletacion = new Date().toISOString()
-
             const nuevaRachaActual = rachaActual + 1
             const nuevaRachaCiclo = rachaCiclo + 1
             const nuevaMejorRacha = Math.max(mejorRacha, nuevaRachaActual)
@@ -111,6 +109,8 @@ export default function Task({task , onToggleCompletada}:Props){
             }
 
             modificarTarea(task.taskId, updates)
+            sumarMonedas(MONEDAS_POR_TAREA) // <-- sumamos monedas al completar la tarea
+                .catch(err => console.error("Error al sumar monedas:", err));
             setRachaActual(nuevaRachaActual)
             setRachaCiclo(nuevaRachaCiclo)
             setMejorRacha(nuevaMejorRacha)
@@ -126,6 +126,9 @@ export default function Task({task , onToggleCompletada}:Props){
                     activa: true,
                 }
                 modificarTarea(task.taskId, updates)
+                sumarMonedas(-MONEDAS_POR_TAREA) // <-- restamos monedas al desmarcar la tarea completada
+                    .catch(err => console.error("Error al restar monedas:", err));
+                setRachaActual(0)
                 setHoyHecho(false)
                 onToggleCompletada?.(task.taskId, updates)   // ← agregar acá también
                 return
@@ -144,6 +147,8 @@ export default function Task({task , onToggleCompletada}:Props){
             setRachaCiclo(nuevaRachaCiclo)
             setRachaActual(nuevaRachaActual)
             modificarTarea(task.taskId, updates)
+            sumarMonedas(-MONEDAS_POR_TAREA) // <-- restamos monedas al desmarcar la tarea completada
+                .catch(err => console.error("Error al restar monedas:", err));
             setHoyHecho(false)
             onToggleCompletada?.(task.taskId, updates)   // ← pasa todo el objeto
         }

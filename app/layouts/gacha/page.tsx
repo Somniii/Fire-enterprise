@@ -1,71 +1,96 @@
-'use client'; // Indicamos que este componente se renderiza en el cliente (navegador)
+'use client';
 
-import { useEffect, useState } from 'react'; // Para manejar el estado de las monedas, el premio obtenido y la animación
-import GlassCard from '../../components/styles/glasscard'; // Componente de tarjeta con efecto glassmorphism para envolver el contenido del gacha
-import ImageBackground from '../../components/homepage/imagebackground'; // Componente de fondo fijo con imagen y efecto de parallax
-import { obtenerUsuarioActual, obtenerMonedasUsuario, actualizarMonedasUsuario, calcularPremioGacha, guardarPremioUsuario } from '../../lib/gacha'; // Funciones para manejar la lógica del gacha y la interacción con Firebase
+import { useEffect, useState } from 'react';
+import GlassCard from '../../components/styles/glasscard';
+import ImageBackground from '../../components/homepage/imagebackground';
+import {
+  obtenerUsuarioActual,
+  obtenerMonedasUsuario,
+  actualizarMonedasUsuario,
+  calcularPremioGacha,
+  guardarPremioUsuario,
+  obtenerSobresUsuario,
+  registrarSobreAbierto,
+  SOBRES_MAX_DIARIO,
+} from '../../lib/gacha';
 
 export default function GachaPage() {
-  const [monedas, setMonedas] = useState(100); 
-  const [premioObtenido, setPremioObtenido] = useState<any>(null); 
-  const [animando, setAnimando] = useState(false); 
+  const [monedas, setMonedas] = useState(100);
+  const [premioObtenido, setPremioObtenido] = useState<any>(null);
+  const [animando, setAnimando] = useState(false);
 
-  //Traemos las monedas reales de Firestore de forma segura al cargar la vista
+  const [sobresAbiertosHoy, setSobresAbiertosHoy] = useState(0);
+  const [sobresDisponibles, setSobresDisponibles] = useState(SOBRES_MAX_DIARIO);
+
   useEffect(() => {
     const cargarMonedas = async () => {
       const user = obtenerUsuarioActual();
       if (user) {
         const monedasIniciales = await obtenerMonedasUsuario(user.uid);
         setMonedas(monedasIniciales);
+
+        const { abiertosHoy, disponibles } = await obtenerSobresUsuario(user.uid);
+        setSobresAbiertosHoy(abiertosHoy);
+        setSobresDisponibles(disponibles);
       }
     };
     cargarMonedas();
-  }, []); // El array vacío asegura que solo se ejecute UNA VEZ al entrar
+  }, []);
 
-  const manejarTirada = async () => { // Función que se ejecuta al hacer click en tirar el gacha
-    const user = obtenerUsuarioActual(); // Obtenemos el usuario actual para validar que pueda tirar el gacha
+  const manejarTirada = async () => {
+    const user = obtenerUsuarioActual();
 
     if (!user){
         alert('Debes iniciar sesión para tirar el gacha');
         return;
     }
-    if (monedas < 20) { // Validamos que tenga al menos 20 monedas para tirar el gacha
+    if (sobresDisponibles <= 0) {
+        alert('Ya abriste tus 3 sobres de hoy. Volvé mañana para abrir más sobres.');
+        return;
+    }
+    if (monedas < 20) {
         alert('No tienes suficientes monedas para tirar el gacha');
         return;
     }
-        setAnimando(true); // Iniciamos la animación de tirada
-        setPremioObtenido(null); // Reseteamos el premio obtenido para mostrar la animación
+        setAnimando(true);
+        setPremioObtenido(null);
 
         try {
-        const premio = calcularPremioGacha(); // Calculamos el premio que salió de la tirada
-        const nuevasMonedas = monedas - 20; // Calculamos las monedas restantes después de gastar 20 para tirar el gacha
+        const premio = calcularPremioGacha();
+        const nuevasMonedas = monedas - 20;
 
-        // Actualizamos las monedas del usuario en la base de datos
-        await actualizarMonedasUsuario(user.uid, nuevasMonedas); 
-        // Guardamos el premio obtenido en la base de datos del usuario para mostrarlo en su perfil o historial de premios
+        await actualizarMonedasUsuario(user.uid, nuevasMonedas);
         await guardarPremioUsuario(user.uid, premio);
+        await registrarSobreAbierto(user.uid, sobresAbiertosHoy);
 
-        setTimeout(() => { // Simulamos el tiempo de animación de la tirada (3 segundos)
-            setMonedas(nuevasMonedas); // Actualizamos las monedas en el estado para reflejar el gasto
-            setPremioObtenido(premio); // Mostramos el premio obtenido después de la animación
-            setAnimando(false); // Terminamos la animación
-        }, 2000);   
+        setTimeout(() => {
+            setMonedas(nuevasMonedas);
+            setPremioObtenido(premio);
+            setSobresAbiertosHoy(prev => prev + 1);
+            setSobresDisponibles(prev => Math.max(0, prev - 1));
+            setAnimando(false);
+        }, 2000);
     } catch (error) {
         console.error('Error al tirar el gacha:', error);
         alert('Ocurrió un error al tirar el gacha. Inténtalo de nuevo.');
-        setAnimando(false); // Aseguramos que la animación termine en caso de error 
+        setAnimando(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center px-4 relative">
+    <div className="min-h-screen w-full flex flex-col items-center justify-start pt-16 md:pt-24 px-4 relative">
       <ImageBackground />
 
-      <GlassCard className="!h-auto max-w-lg w-full text-center flex flex-col items-center justify-center gap-6">
-        
+      <GlassCard className="!h-auto max-w-lg w-full text-center flex flex-col items-center justify-center gap-6 pt-15">
+
         {/* Marcador de Monedas del Usuario */}
         <div className="absolute top-4 right-6 bg-white/10 border border-white/20 rounded-full px-4 py-1 text-sm font-semibold tracking-wide">
           🔥 {monedas} Monedas
+        </div>
+
+        {/* Marcador de sobres disponibles */}
+        <div className="absolute top-4 left-6 bg-white/10 border border-white/20 rounded-full px-4 py-1 text-sm font-semibold tracking-wide">
+          ✉️ {sobresAbiertosHoy}/{SOBRES_MAX_DIARIO} sobres hoy
         </div>
 
         <div>
@@ -73,28 +98,27 @@ export default function GachaPage() {
           <p className="text-white/60 text-sm mt-1">Gasta 20 monedas para invocar una recompensa</p>
         </div>
 
-        {/* El Contenedor del Sobre / Invocación */}
+        {/* El Contenedor del Sobre / Invocación (único bloque) */}
         <div className="w-full h-52 flex items-center justify-center relative">
         {animando ? (
-            // Animación de carga mística mientras gira
             <div className="w-28 h-28 rounded-full border-4 border-t-orange-500 border-white/20 animate-spin"></div>
         ) : premioObtenido ? (
-            // Tarjeta del premio revelado con su FOTO REAL
             <div className="p-6 bg-white/5 border border-white/10 rounded-2xl scale-105 transition-all duration-300 backdrop-blur-md shadow-lg flex flex-col items-center justify-center">
-            
-            {/* 1. CLAVAMOS LA IMAGEN DEL PREMIO ACÁ */}
-            <img 
-                src={premioObtenido.image} 
-                alt={premioObtenido.name} 
+            <img
+                src={premioObtenido.image}
+                alt={premioObtenido.name}
                 className="w-20 h-20 object-contain mb-3 drop-shadow-[0_10px_10px_rgba(255,255,255,0.1)]"
             />
-
             <span className="text-[10px] uppercase font-bold tracking-widest text-white/40">¡Invocación Exitosa!</span>
             <h2 className={`text-2xl font-black mt-1 ${premioObtenido.color}`}>{premioObtenido.name}</h2>
             <p className="text-white/70 text-sm mt-0.5">Rareza: {premioObtenido.rarity}</p>
             </div>
+        ) : sobresDisponibles <= 0 ? (
+            <div className="w-32 h-44 bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-2xl flex flex-col items-center justify-center opacity-50 cursor-not-allowed">
+            <span className="text-4xl">🔒</span>
+            <span className="text-[10px] uppercase tracking-widest text-white/40 mt-3 font-semibold text-center px-2">Sin sobres hoy</span>
+            </div>
         ) : (
-            // Estado inicial: El sobre cerrado esperando ser abierto
             <div className="w-32 h-44 bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl flex flex-col items-center justify-center shadow-md hover:border-orange-500/50 transition-all duration-300 group cursor-pointer" onClick={manejarTirada}>
             <span className="text-4xl group-hover:scale-110 transition-transform">✉️</span>
             <span className="text-[10px] uppercase tracking-widest text-white/40 mt-3 font-semibold">Sobre Místico</span>
@@ -102,13 +126,17 @@ export default function GachaPage() {
         )}
         </div>
 
-        {/* Botón de acción */}
+        {/* Botón de acción (único) */}
         <button
           onClick={manejarTirada}
-          disabled={animando || monedas < 20}
+          disabled={animando || monedas < 20 || sobresDisponibles <= 0}
           className="bg-white/20 hover:bg-white/30 active:bg-white/40 border border-white/30 text-white font-bold px-8 py-3 rounded-xl tracking-wide transition-all shadow-md disabled:opacity-30 disabled:cursor-not-allowed uppercase text-sm"
         >
-          {animando ? 'Invocando...' : 'Tirar Gacha (20 Monedas)'}
+          {animando
+            ? 'Invocando...'
+            : sobresDisponibles <= 0
+            ? 'Sin sobres hoy'
+            : 'Tirar Gacha (20 Monedas)'}
         </button>
 
       </GlassCard>
