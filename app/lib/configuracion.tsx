@@ -23,6 +23,7 @@ export default function AjustesPerfil() {
 
   const [avatarId, setAvatarId] = useState<number>(0);
   const [avatarConfirmado, setAvatarConfirmado] = useState<number>(0);
+  const [avataresDesbloqueados, setAvataresDesbloqueados] = useState<number[]>([0]); 
   const auth = getAuth();
 
   const handleCerrarSesion = async () => {
@@ -40,9 +41,11 @@ export default function AjustesPerfil() {
       if (auth.currentUser) {
         const docSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
         if (docSnap.exists()) {
-          const id = docSnap.data().avatarId || 0;
+          const data = docSnap.data();
+          const id =data.avatarId || 0;
           setAvatarId(id);
           setAvatarConfirmado(id);
+          setAvataresDesbloqueados(data.avataresDesbloqueados ?? [0]);
         }
       }
     };
@@ -136,14 +139,13 @@ export default function AjustesPerfil() {
     setLoading(false);
   };
 
-  return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-start pt-20 px-4 relative">
+   return (
+    <div className="min-h-screen w-full flex flex-col items-center justify-start pt-16 md:pt-24 px-4 relative">
       <UpBar />
       <ImageBackground />
 
       <GlassCard className="!h-auto max-w-md w-full flex flex-col p-6 border border-white/5 backdrop-blur-md shadow-2xl rounded-2xl relative">
 
-        {/* Botón X para volver al inicio */}
         <button
           onClick={() => router.push('/layouts/homepage')}
           className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors text-xl leading-none"
@@ -152,15 +154,11 @@ export default function AjustesPerfil() {
           ✕
         </button>
         
-        {/* Encabezado */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold tracking-tight text-white drop-shadow-md">Mi Cuenta</h1>
-          <p className="text-white/60 text-xs mt-1">
-            Actualizá tus datos de perfil
-          </p>
+          <p className="text-white/60 text-xs mt-1">Actualizá tus datos de perfil</p>
         </div>
 
-        {/* Mensajes */}
         {error && (
           <div className="mb-4 bg-red-500/10 border border-red-500/20 text-red-200 text-xs p-2.5 rounded-xl text-center backdrop-blur-sm">
             {error}
@@ -172,18 +170,19 @@ export default function AjustesPerfil() {
           </div>
         )}
 
-        {/* Visualización del Avatar (Carrusel) */}
+        {/* Visualización del Avatar (Carrusel) — ahora solo entre los desbloqueados */}
         <div className="flex flex-col items-center mb-6">
           
           <div className="flex items-center justify-center gap-4 mb-4">
             <button 
               onClick={() => {
-                const ids = Object.keys(AVATARES).map(Number);
+                const ids = [...avataresDesbloqueados].sort((a, b) => a - b); 
                 const currentIndex = ids.indexOf(avatarId);
                 const newIndex = (currentIndex - 1 + ids.length) % ids.length;
                 seleccionarAvatar(ids[newIndex]);
               }}
-              className="text-white/50 hover:text-white transition-colors text-2xl"
+              disabled={avataresDesbloqueados.length <= 1} // 
+              className="text-white/50 hover:text-white transition-colors text-2xl disabled:opacity-20 disabled:cursor-not-allowed"
             >
               ◀
             </button>
@@ -205,16 +204,23 @@ export default function AjustesPerfil() {
 
             <button 
               onClick={() => {
-                const ids = Object.keys(AVATARES).map(Number);
+                const ids = [...avataresDesbloqueados].sort((a, b) => a - b); // 
                 const currentIndex = ids.indexOf(avatarId);
                 const newIndex = (currentIndex + 1) % ids.length;
                 seleccionarAvatar(ids[newIndex]);
               }}
-              className="text-white/50 hover:text-white transition-colors text-2xl"
+              disabled={avataresDesbloqueados.length <= 1} // 
+              className="text-white/50 hover:text-white transition-colors text-2xl disabled:opacity-20 disabled:cursor-not-allowed"
             >
               ▶
             </button>
           </div>
+
+          {avataresDesbloqueados.length <= 1 && (
+            <p className="text-white/35 text-xs text-center mb-2">
+              Abrí sobres en el Altar del Fuego para conseguir más avatares🔥
+            </p>
+          )}
           
           {avatarId !== avatarConfirmado && (
             <button 
@@ -225,6 +231,7 @@ export default function AjustesPerfil() {
             </button>
           )}
         </div>
+
 
         {/* Formulario Nombre */}
         <form onSubmit={cambiarNombre} className="space-y-4 mb-6">
