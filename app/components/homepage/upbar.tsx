@@ -97,7 +97,7 @@ export default function UpBar() {
                         <button
                             onClick={() => {
                                 setMenuAbierto(false)
-                                router.push("/layouts/perfil")
+                                router.push("/layouts/Ajusteperfil")
                             }}
                             className="block w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100"
                         >

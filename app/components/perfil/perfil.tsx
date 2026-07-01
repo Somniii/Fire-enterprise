@@ -116,7 +116,7 @@ export default function Perfil({ onClose }: { onClose?: () => void }) {
   }, []);
 
   return (
-    <GlassCard className="!h-auto w-full max-w-6xl mx-auto flex flex-col">
+    <div className="w-full max-w-6xl mx-auto flex flex-col">
 
       {/* Header + Monedas en fila en pantallas grandes */}
       <div className="flex flex-col lg:flex-row gap-6 mb-6 pb-6 border-b border-white/10">
@@ -194,23 +194,7 @@ export default function Perfil({ onClose }: { onClose?: () => void }) {
         </div>
       )}
 
-      {/* Botones */}
-      <div className="flex flex-col sm:flex-row gap-3 mt-6">
-        <button
-          onClick={() => router.push('/layouts/Ajusteperfil')}
-          className="flex-1 bg-white/12 hover:bg-white/20 border border-white/20 active:bg-white/30 text-white font-medium rounded-xl py-2.5 transition-all backdrop-blur-md"
-        >
-          Editar datos
-        </button>
-
-        <button
-          onClick={() => router.push('/layouts/login')}
-          className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 active:bg-white/20 text-white/60 font-medium rounded-xl py-2.5 transition-all backdrop-blur-md"
-        >
-          Cerrar perfil
-        </button>
-      </div>
-
-    </GlassCard>
+    </div>
+      
   );
 }
