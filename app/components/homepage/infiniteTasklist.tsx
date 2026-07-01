@@ -6,7 +6,7 @@ import Task from "./simpleTask"
 const DIAS_ORDENADOS = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"]
 const DIAS_DISPLAY = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"]
 
-const DIAS_POR_CARGA = 7 // cuantos dias cargar cada vez
+const DIAS_POR_CARGA = 7
 
 function filtrarTareasPorDia(tareas: TaskInterface[], fecha: Date): TaskInterface[] {
     const nombreDia = DIAS_ORDENADOS[fecha.getDay()]
@@ -33,7 +33,7 @@ export default function InfiniteTaskList() {
     const [cantidadDias, setCantidadDias] = useState(DIAS_POR_CARGA)
     const [cargando, setCargando] = useState(false)
     const loaderRef = useRef<HTMLDivElement>(null)
-    const hoy = useRef(new Date()) // useRef para que no cambie en cada render
+    const hoy = useRef(new Date())
 
     const cargar = useCallback(async () => {
         const data = await obtenerTareas()
@@ -44,7 +44,6 @@ export default function InfiniteTaskList() {
         cargar()
     }, [cargar])
 
-    // IntersectionObserver: cuando el div loader es visible, carga más días
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
@@ -53,7 +52,7 @@ export default function InfiniteTaskList() {
                     setTimeout(() => {
                         setCantidadDias(prev => prev + DIAS_POR_CARGA)
                         setCargando(false)
-                    }, 300) // pequeño delay para no spamear
+                    }, 300)
                 }
             },
             { threshold: 0.1 }
@@ -74,14 +73,32 @@ export default function InfiniteTaskList() {
     })
 
     return (
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-6">
             {dias.map((dia, i) => (
                 <div key={i}>
-                    <h2 className="text-white/60 text-xs uppercase tracking-widest mb-3 px-1">
+                    <div className="
+                        w-[66rem]
+                        ml-[1rem]
+                        h-12
+                        flex
+                        items-center
+                        px-6
+                        rounded-xl
+                        bg-neutral-100
+                        font-semibold
+                        text-neutral-700
+                        text-sm
+                        uppercase
+                        tracking-widest
+                        shadow-sm
+                        border
+                        mb-3
+                    ">
                         {dia.label}
-                    </h2>
+                    </div>
+
                     {dia.tareas.length === 0 ? (
-                        <p className="text-white/30 text-sm px-1">Sin tareas</p>
+                        <p className="text-neutral-400 text-sm px-6 ml-[1rem]">Sin tareas</p>
                     ) : (
                         <div className="flex flex-col gap-2">
                             {dia.tareas.map(tarea => (
@@ -92,9 +109,8 @@ export default function InfiniteTaskList() {
                 </div>
             ))}
 
-            {/* Este div invisible es el trigger del scroll infinito */}
             <div ref={loaderRef} className="py-4 text-center">
-                {cargando && <p className="text-white/30 text-sm">Cargando más días...</p>}
+                {cargando && <p className="text-neutral-400 text-sm">Cargando más días...</p>}
             </div>
         </div>
     )
