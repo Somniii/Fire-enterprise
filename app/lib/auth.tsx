@@ -83,7 +83,9 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
                 tarea.completadaHoy = false
             }
         }
+        
     }
+    
 
     return tareas
 }

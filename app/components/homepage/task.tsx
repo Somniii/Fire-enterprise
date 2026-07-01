@@ -55,6 +55,8 @@ export default function Task({task}:Props){
     const [hoyHecho, setHoyHecho] = useState (task.completadaHoy)
     const diaActual = new Date()
     const [diasExtras, setDiasExtras] = useState(0)
+    //Lo que hace este useState es cuando vos pasas por arriba de la tarea funcinoa como verificador para ver los dias que podes hacerla y la descripcion 
+    const [hoverTask, setHoverTask] = useState(false)
 
     //si puede hacer la racha ese ciclo ej esa semana o ya no le dan los dias
            //1. QUEDARNOS CON LAS TAREAS ACTIVAS DE ESE USUARIO
@@ -195,22 +197,26 @@ export default function Task({task}:Props){
     }
     return(
         <>
+        <div className="                        
+        hover:shadow-xl
+        hover:scale-[1.01]
+        transition-all
+        duration-200">
             <div
-                    className="
+                    className={`
                         bg-white
                         w-[66rem]
                         h-[3rem]
                         ml-[1rem]
                         mt-[1.5rem]
-                        rounded-xl
                         flex
 
-                        hover:shadow-xl
-                        hover:scale-[1.01]
 
-                        transition-all
-                        duration-200
-                    "
+                        ${hoverTask ? "rounded-t-xl" : "rounded-xl"}
+
+                    `}
+                    onMouseEnter={()=>setHoverTask(true)}
+                    onMouseLeave={()=>setHoverTask(false)}
                 >
                 <div className="flex w-full items-center">
                     <div className="w-[4%]">
@@ -278,7 +284,30 @@ export default function Task({task}:Props){
 
                     </div>
                 </div>
+
             </div>
+                 {hoverTask && (
+                    <div
+                        className="
+                        bg-white
+                        w-[66rem]
+                        h-[3rem]
+                        ml-[1rem]
+                        rounded-b-xl
+                        flex
+
+                    "
+                    onMouseEnter={()=>setHoverTask(true)}
+                    onMouseLeave={()=>setHoverTask(false)}>
+                        <div>
+                            <p className="text-black  text-lg">
+                                {task.nota}
+                            </p>
+                        </div>
+                    </div>
+                )}
+        </div>
+            
         </>
     )
 }
