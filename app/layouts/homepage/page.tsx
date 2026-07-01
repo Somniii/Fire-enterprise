@@ -27,7 +27,7 @@ export default function Homepage() {
     if (!authListo) return null
     return (
         <div className="min-h-screen relative">
-            <UpBar />
+            <UpBar onInicio={() => setOpcion(1)} />
             <ImageBackground />
             <div className="pt-16 flex min-h-screen">
                 <LeftBar opcion={opcion} setOpcion={setOpcion} />

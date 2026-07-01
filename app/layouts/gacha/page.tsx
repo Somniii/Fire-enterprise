@@ -3,27 +3,35 @@
 import { useEffect, useState } from 'react';
 import GlassCard from '../../components/styles/glasscard';
 import ImageBackground from '../../components/homepage/imagebackground';
+import { AVATARES } from '../../components/avatares/avatares'; 
 import {
   obtenerUsuarioActual,
   obtenerMonedasUsuario,
   actualizarMonedasUsuario,
   calcularPremioGacha,
-  guardarPremioUsuario,
+  procesarPremioGacha,
   obtenerSobresUsuario,
   registrarSobreAbierto,
   SOBRES_MAX_DIARIO,
+  PremioGacha,
 } from '../../lib/gacha';
+
+// Tipo del resultado ya combinado con la info de si era nuevo/duplicado, para mostrar en pantalla
+type ResultadoVisual =
+  | { tipo: 'objeto'; name: string; rarity: string; color: string; image: string }
+  | { tipo: 'mono'; name: string; rarity: string; color: string; image: string }
+  | { tipo: 'avatar'; avatarId: number; esNuevo: boolean; monedasGanadas?: number };
 
 export default function GachaPage() {
   const [monedas, setMonedas] = useState(100);
-  const [premioObtenido, setPremioObtenido] = useState<any>(null);
+  const [premioObtenido, setPremioObtenido] = useState<ResultadoVisual | null>(null);
   const [animando, setAnimando] = useState(false);
 
   const [sobresAbiertosHoy, setSobresAbiertosHoy] = useState(0);
   const [sobresDisponibles, setSobresDisponibles] = useState(SOBRES_MAX_DIARIO);
 
   useEffect(() => {
-    const cargarMonedas = async () => {
+    const cargarDatos = async () => {
       const user = obtenerUsuarioActual();
       if (user) {
         const monedasIniciales = await obtenerMonedasUsuario(user.uid);
@@ -34,13 +42,13 @@ export default function GachaPage() {
         setSobresDisponibles(disponibles);
       }
     };
-    cargarMonedas();
+    cargarDatos();
   }, []);
 
   const manejarTirada = async () => {
     const user = obtenerUsuarioActual();
 
-    if (!user){
+    if (!user) {
         alert('Debes iniciar sesión para tirar el gacha');
         return;
     }
@@ -52,20 +60,35 @@ export default function GachaPage() {
         alert('No tienes suficientes monedas para tirar el gacha');
         return;
     }
-        setAnimando(true);
-        setPremioObtenido(null);
 
-        try {
-        const premio = calcularPremioGacha();
+    setAnimando(true);
+    setPremioObtenido(null);
+
+    try {
+        const premio: PremioGacha = calcularPremioGacha();
         const nuevasMonedas = monedas - 20;
 
         await actualizarMonedasUsuario(user.uid, nuevasMonedas);
-        await guardarPremioUsuario(user.uid, premio);
+        const resultado = await procesarPremioGacha(user.uid, premio);
         await registrarSobreAbierto(user.uid, sobresAbiertosHoy);
 
+        // Si fue un avatar duplicado, sumamos las monedas ganadas al total final
+        const monedasFinal = nuevasMonedas + (resultado.monedasGanadas ?? 0);
+
         setTimeout(() => {
-            setMonedas(nuevasMonedas);
-            setPremioObtenido(premio);
+            setMonedas(monedasFinal);
+
+            if (premio.tipo === 'avatar') {
+                setPremioObtenido({
+                    tipo: 'avatar',
+                    avatarId: premio.avatarId,
+                    esNuevo: resultado.esNuevoAvatar ?? false,
+                    monedasGanadas: resultado.monedasGanadas,
+                });
+            } else {
+                setPremioObtenido(premio);
+            }
+
             setSobresAbiertosHoy(prev => prev + 1);
             setSobresDisponibles(prev => Math.max(0, prev - 1));
             setAnimando(false);
@@ -83,12 +106,10 @@ export default function GachaPage() {
 
       <GlassCard className="!h-auto max-w-lg w-full text-center flex flex-col items-center justify-center gap-6 pt-15">
 
-        {/* Marcador de Monedas del Usuario */}
         <div className="absolute top-4 right-6 bg-white/10 border border-white/20 rounded-full px-4 py-1 text-sm font-semibold tracking-wide">
           🔥 {monedas} Monedas
         </div>
 
-        {/* Marcador de sobres disponibles */}
         <div className="absolute top-4 left-6 bg-white/10 border border-white/20 rounded-full px-4 py-1 text-sm font-semibold tracking-wide">
           ✉️ {sobresAbiertosHoy}/{SOBRES_MAX_DIARIO} sobres hoy
         </div>
@@ -98,35 +119,73 @@ export default function GachaPage() {
           <p className="text-white/60 text-sm mt-1">Gasta 20 monedas para invocar una recompensa</p>
         </div>
 
-        {/* El Contenedor del Sobre / Invocación (único bloque) */}
         <div className="w-full h-52 flex items-center justify-center relative">
         {animando ? (
             <div className="w-28 h-28 rounded-full border-4 border-t-orange-500 border-white/20 animate-spin"></div>
-        ) : premioObtenido ? (
+
+        ) : premioObtenido?.tipo === 'avatar' ? (
+            // Resultado: avatar (nuevo o duplicado convertido en monedas)
             <div className="p-6 bg-white/5 border border-white/10 rounded-2xl scale-105 transition-all duration-300 backdrop-blur-md shadow-lg flex flex-col items-center justify-center">
-            <img
-                src={premioObtenido.image}
-                alt={premioObtenido.name}
-                className="w-20 h-20 object-contain mb-3 drop-shadow-[0_10px_10px_rgba(255,255,255,0.1)]"
-            />
-            <span className="text-[10px] uppercase font-bold tracking-widest text-white/40">¡Invocación Exitosa!</span>
-            <h2 className={`text-2xl font-black mt-1 ${premioObtenido.color}`}>{premioObtenido.name}</h2>
-            <p className="text-white/70 text-sm mt-0.5">Rareza: {premioObtenido.rarity}</p>
+                <img
+                    src={AVATARES[premioObtenido.avatarId]?.public}
+                    alt={`Avatar ${premioObtenido.avatarId}`}
+                    className="w-20 h-20 rounded-full object-cover mb-3 border-2 border-purple-400/50"
+                />
+                {premioObtenido.esNuevo ? (
+                    <>
+                        <span className="text-[10px] uppercase font-bold tracking-widest text-white/40">¡Invocación Exitosa!</span>
+                        <h2 className="text-2xl font-black mt-1 text-purple-300">Nuevo Avatar</h2>
+                        <p className="text-white/70 text-sm mt-0.5">Se agregó a tu colección</p>
+                    </>
+                ) : (
+                    <>
+                        <span className="text-[10px] uppercase font-bold tracking-widest text-white/40">Avatar repetido</span>
+                        <h2 className="text-2xl font-black mt-1 text-yellow-300">+{premioObtenido.monedasGanadas} 🪙</h2>
+                        <p className="text-white/70 text-sm mt-0.5">Ya lo tenías, se convirtió en monedas</p>
+                    </>
+                )}
             </div>
+
+        ) : premioObtenido?.tipo === 'mono' ? (
+            // Resultado: el objeto secretísimo
+            <div className="p-6 bg-white/5 border border-purple-400/30 rounded-2xl scale-105 transition-all duration-300 backdrop-blur-md shadow-lg flex flex-col items-center justify-center">
+                <img
+                    src={premioObtenido.image}
+                    alt={premioObtenido.name}
+                    className="w-20 h-20 object-contain mb-3 drop-shadow-[0_10px_10px_rgba(168,85,247,0.4)]"
+                    onError={(e) => (e.currentTarget.src = '/assets/images/placeholder.png')}
+                />
+                <span className="text-[10px] uppercase font-bold tracking-widest text-purple-300">¡Objeto Secreto!</span>
+                <h2 className={`text-2xl font-black mt-1 ${premioObtenido.color}`}>{premioObtenido.name}</h2>
+                <p className="text-white/70 text-sm mt-0.5">Rarísimo — revisá tu perfil</p>
+            </div>
+
+        ) : premioObtenido?.tipo === 'objeto' ? (
+            // Resultado: objeto normal
+            <div className="p-6 bg-white/5 border border-white/10 rounded-2xl scale-105 transition-all duration-300 backdrop-blur-md shadow-lg flex flex-col items-center justify-center">
+                <img
+                    src={premioObtenido.image}
+                    alt={premioObtenido.name}
+                    className="w-20 h-20 object-contain mb-3 drop-shadow-[0_10px_10px_rgba(255,255,255,0.1)]"
+                />
+                <span className="text-[10px] uppercase font-bold tracking-widest text-white/40">¡Invocación Exitosa!</span>
+                <h2 className={`text-2xl font-black mt-1 ${premioObtenido.color}`}>{premioObtenido.name}</h2>
+                <p className="text-white/70 text-sm mt-0.5">Rareza: {premioObtenido.rarity}</p>
+            </div>
+
         ) : sobresDisponibles <= 0 ? (
             <div className="w-32 h-44 bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-2xl flex flex-col items-center justify-center opacity-50 cursor-not-allowed">
-            <span className="text-4xl">🔒</span>
-            <span className="text-[10px] uppercase tracking-widest text-white/40 mt-3 font-semibold text-center px-2">Sin sobres hoy</span>
+                <span className="text-4xl">🔒</span>
+                <span className="text-[10px] uppercase tracking-widest text-white/40 mt-3 font-semibold text-center px-2">Sin sobres hoy</span>
             </div>
         ) : (
             <div className="w-32 h-44 bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl flex flex-col items-center justify-center shadow-md hover:border-orange-500/50 transition-all duration-300 group cursor-pointer" onClick={manejarTirada}>
-            <span className="text-4xl group-hover:scale-110 transition-transform">✉️</span>
-            <span className="text-[10px] uppercase tracking-widest text-white/40 mt-3 font-semibold">Sobre Místico</span>
+                <span className="text-4xl group-hover:scale-110 transition-transform">✉️</span>
+                <span className="text-[10px] uppercase tracking-widest text-white/40 mt-3 font-semibold">Sobre Místico</span>
             </div>
         )}
         </div>
 
-        {/* Botón de acción (único) */}
         <button
           onClick={manejarTirada}
           disabled={animando || monedas < 20 || sobresDisponibles <= 0}
