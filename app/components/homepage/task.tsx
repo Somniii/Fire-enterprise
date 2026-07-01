@@ -12,34 +12,6 @@ import checkboxCheck from '../../assets/icons/check-box-check.svg'
 import fireBlue from '../../assets/icons/fire-blue.svg'
 import CalendarView from "./calendarview";
 
-/*interface Task{
-    idTarea: string;
-    idUsuario?: string | null;
-    fechaCreacion?: Date;
-    //racha actual que es la que se resetea a 0 si no hace
-    rachaActual?: number;
-    //mejor racha que tuvo 
-    mejorRacha?: number;
-    //si hizo la tarea hoy (sale solo el dia que puede hacerlas)
-    completadaHoy?: boolean;
-    //ultima completacion compara hoy es domingo y la hizo el jueves , los dias que puede hacerla son los lunes jueves y domingo todavia puede hacerla hoy pero si ej hoy es domingo y la hizo el lunes automaticamente le pone 0
-    ultimaCompletacion?: Date|null;
-    //dias de la semana que puede hacerla 
-    diasSemana?: string[];
-    //dias del mes que puede hacerla(obvio por ahora no lo vamos a hacer peor hay que encontrar una solucion para los meses con 28 29 30 y 31)
-    diasMes?: number[]
-    //cantidad de dias minimo que tiene que hacer la tarea
-    cantidadDias?: number;
-    //si la racha es mensual semanal o tarea sin racha
-    tipoRepeticion?: string;
-    //titulo de la tarea
-    titulo:string;
-    //nota descriptiva de la tarea
-    nota:string;
-    //La cantidad de dias que va hacciendo la tarea por un ciclo especifico ej : dias: lunes martes jueves hizo lunes martes estamos a jueves rachatipo muestra =2 y compara con cantidad dias mostrando 2/3 , cuando sea domingo se resetea de nuevo a 0 para que vaya sumando de nuevo
-    rachaPorTipo?:number;
-
-}*/
 
 interface Props{
     task:TaskInterface
@@ -354,11 +326,11 @@ export default function Task({task}:Props){
 
                                     <div className="flex-1 space-y-1">
                                         <p className="text-sm font-medium text-neutral-500">Días del mes que podés completarla:</p>
-                                        <CalendarView
-                                            fechas={
-                                                task.detallesMensual?.fechas.map(Number) ?? []
-                                            }
-                                        />
+                                        <div className="transition-transform duration-200 hover:scale-125 hover:z-10 origin-top-left">
+                                            <CalendarView
+                                                fechas={task.detallesMensual?.fechas.map(Number) ?? []}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             )}
