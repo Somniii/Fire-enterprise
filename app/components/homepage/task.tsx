@@ -25,6 +25,7 @@ interface Props{
 export default function Task({task , onToggleCompletada}:Props){
     const [rachaActual,setRachaActual] = useState(task.rachaActual ?? 0)
     const [rachaCiclo ,setRachaCiclo] = useState(task.rachaCiclo ?? 0)
+    const [mejorRacha, setMejorRacha] = useState(task.mejorRacha ?? 0)
     const [diasFaltantes, setDiasFaltantes] = useState( task.cantidadDias- (task.rachaCiclo ?? 0) )
     const [hoyHecho, setHoyHecho] = useState (task.completadaHoy)
     const diaActual = new Date()
@@ -96,28 +97,29 @@ export default function Task({task , onToggleCompletada}:Props){
         if(!hoyHecho){
             const ultimaCompletacion = new Date().toISOString()
 
-
-            // Tareas semanales/mensuales: lógica normal de racha
             const nuevaRachaActual = rachaActual + 1
             const nuevaRachaCiclo = rachaCiclo + 1
+            const nuevaMejorRacha = Math.max(mejorRacha, nuevaRachaActual)
+
             const updates: Partial<TaskInterface> = {
                 rachaActual: nuevaRachaActual,
                 completadaHoy: true,
                 ultimaCompletacion: ultimaCompletacion,
                 rachaCiclo: nuevaRachaCiclo,
                 ultimaUltimaCompletacion: task.ultimaCompletacion ?? null,
+                mejorRacha: nuevaMejorRacha,
             }
 
             modificarTarea(task.taskId, updates)
             setRachaActual(nuevaRachaActual)
             setRachaCiclo(nuevaRachaCiclo)
+            setMejorRacha(nuevaMejorRacha)
             setHoyHecho(true)
             onToggleCompletada?.(task.taskId, true)
 
         }else{
 
             if(task.tipoRepeticion === ""){
-                // Tarea de una sola vez: se destildea y se reactiva
                 const updates: Partial<TaskInterface> = {
                     completadaHoy: false,
                     ultimaCompletacion: null,

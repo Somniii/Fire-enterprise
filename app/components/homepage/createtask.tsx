@@ -111,6 +111,7 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
             rachaCiclo:0,
             cantidadCiclos:0,
             modo:0,
+            horasCompletacionCiclo: [],
             tipoRepeticion: repeatType,
             cantidadDias: repeatType === "week" ? cantidadDiasSemana : repeatType === "month" ? diaDelMes : 0,
             // Si es semanal, guardamos los días checkeados y la cantidad

@@ -37,6 +37,19 @@ export interface TaskInterface {
       // ISO date del último domingo que se reseteó
       // ISO date del último día 1 que se reseteó
 }
+export interface CicloRecord {
+    taskId: string
+    userId: string
+    tipoRepeticion: "week" | "month"
+    fechaInicio: string
+    fechaFin: string
+    diasCompletados: number
+    diasMeta: number
+    cumplida: boolean
+    perdida: boolean
+    horasCompletacion: string[]
+}
+
 
 export interface UserInterface {
     uid: string
@@ -47,6 +60,9 @@ export interface UserInterface {
     xp: number
     createdAt: string
 }
+
+
+
 
 // ── TAREAS ──────────────────────────────────────────────
 //FUNCIONES TAREAS
@@ -275,6 +291,7 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
 
     return tareas
 }
+
 
 // ── USUARIO ──────────────────────────────────────────────
 
