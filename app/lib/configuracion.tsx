@@ -6,12 +6,13 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import GlassCard from '../components/styles/glasscard'; 
 import ImageBackground from '../components/homepage/imagebackground';
+import UpBar from '../components/homepage/upbar'; // <-- ajustá esta ruta a la real de tu UpBar
 import { AVATARES } from '../components/avatares/avatares';
 import { motion, AnimatePresence } from 'framer-motion';
 import { setAvatarGuardado as guardarAvatarEnStorage } from '../components/avatares/estado';
 
 export default function AjustesPerfil() {
-  const router = useRouter(); // Inicializamos el router
+  const router = useRouter();
   
   const [nuevoNombre, setNuevoNombre] = useState('');
   const [nuevaContrasenia, setNuevaContrasenia] = useState('');
@@ -20,8 +21,8 @@ export default function AjustesPerfil() {
   const [mensajeExito, setMensajeExito] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [avatarId, setAvatarId] = useState<number>(0); // Estado para el ID
-  const [avatarConfirmado, setAvatarConfirmado] = useState<number>(0); // Estado para el ID confirmado
+  const [avatarId, setAvatarId] = useState<number>(0);
+  const [avatarConfirmado, setAvatarConfirmado] = useState<number>(0);
   const auth = getAuth();
 
   const handleCerrarSesion = async () => {
@@ -34,8 +35,6 @@ export default function AjustesPerfil() {
     }
   }
 
-
-// 2. Cargar el avatar actual del usuario al entrar a la página
   useEffect(() => {
     const fetchUserData = async () => {
       if (auth.currentUser) {
@@ -55,20 +54,20 @@ export default function AjustesPerfil() {
   }
 
   const guardarCambiosAvatar = async () => {
-  if (!auth.currentUser) return;
-  try {
-    setLoading(true);
-    await updateDoc(doc(db, "users", auth.currentUser.uid), { avatarId: avatarId });
-    guardarAvatarEnStorage(); // Guarda en localStorage y dispara el evento de actualización
-    setAvatarConfirmado(avatarId);
-    window.dispatchEvent(new Event("avatarChanged")); // <- notifica a todos
-    setMensajeExito("¡Avatar guardado correctamente!");
-  } catch (error) {
-    setError("Error al guardar el avatar");
-  } finally {
-    setLoading(false);
-  }
-};
+    if (!auth.currentUser) return;
+    try {
+      setLoading(true);
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { avatarId: avatarId });
+      guardarAvatarEnStorage();
+      setAvatarConfirmado(avatarId);
+      window.dispatchEvent(new Event("avatarChanged"));
+      setMensajeExito("¡Avatar guardado correctamente!");
+    } catch (error) {
+      setError("Error al guardar el avatar");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const cambiarNombre = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,13 +136,21 @@ export default function AjustesPerfil() {
     setLoading(false);
   };
 
-
-
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-start pt-16 md:pt-24 px-4 relative">
+    <div className="min-h-screen w-full flex flex-col items-center justify-start pt-20 px-4 relative">
+      <UpBar />
       <ImageBackground />
 
-      <GlassCard className="!h-auto max-w-md w-full flex flex-col p-6 border border-white/5 backdrop-blur-md shadow-2xl rounded-2xl">
+      <GlassCard className="!h-auto max-w-md w-full flex flex-col p-6 border border-white/5 backdrop-blur-md shadow-2xl rounded-2xl relative">
+
+        {/* Botón X para volver al inicio */}
+        <button
+          onClick={() => router.push('/layouts/homepage')}
+          className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors text-xl leading-none"
+          aria-label="Cerrar y volver al inicio"
+        >
+          ✕
+        </button>
         
         {/* Encabezado */}
         <div className="text-center mb-6">
@@ -166,62 +173,58 @@ export default function AjustesPerfil() {
         )}
 
         {/* Visualización del Avatar (Carrusel) */}
-<div className="flex flex-col items-center mb-6">
-  
-  <div className="flex items-center justify-center gap-4 mb-4">
-    {/* Flecha Izquierda */}
-    <button 
-      onClick={() => {
-        const ids = Object.keys(AVATARES).map(Number);
-        const currentIndex = ids.indexOf(avatarId);
-        const newIndex = (currentIndex - 1 + ids.length) % ids.length;
-        seleccionarAvatar(ids[newIndex]);
-      }}
-      className="text-white/50 hover:text-white transition-colors text-2xl"
-    >
-      ◀
-    </button>
+        <div className="flex flex-col items-center mb-6">
+          
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <button 
+              onClick={() => {
+                const ids = Object.keys(AVATARES).map(Number);
+                const currentIndex = ids.indexOf(avatarId);
+                const newIndex = (currentIndex - 1 + ids.length) % ids.length;
+                seleccionarAvatar(ids[newIndex]);
+              }}
+              className="text-white/50 hover:text-white transition-colors text-2xl"
+            >
+              ◀
+            </button>
 
-    {/* Avatar con Animación */}
-    <div className="relative w-24 h-24 overflow-hidden rounded-full border-2 border-orange-500/50 shadow-lg">
-      <AnimatePresence mode="wait">
-        <motion.img
-          key={avatarId}
-          src={AVATARES[avatarId].public}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.2 }}
-          className="w-full h-full object-cover"
-          alt={`Avatar ${avatarId}`}
-        />
-      </AnimatePresence>
-    </div>
+            <div className="relative w-24 h-24 overflow-hidden rounded-full border-2 border-orange-500/50 shadow-lg">
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={avatarId}
+                  src={AVATARES[avatarId].public}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full h-full object-cover"
+                  alt={`Avatar ${avatarId}`}
+                />
+              </AnimatePresence>
+            </div>
 
-    {/* Flecha Derecha */}
-    <button 
-      onClick={() => {
-        const ids = Object.keys(AVATARES).map(Number);
-        const currentIndex = ids.indexOf(avatarId);
-        const newIndex = (currentIndex + 1) % ids.length;
-        seleccionarAvatar(ids[newIndex]);
-      }}
-      className="text-white/50 hover:text-white transition-colors text-2xl"
-    >
-      ▶
-    </button>
-  </div>
-  
-  {/* AQUÍ VA EL BOTÓN CONDICIONAL */}
-  {avatarId !== avatarConfirmado && (
-    <button 
-      onClick={guardarCambiosAvatar}
-      className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl py-2 px-4 transition-all animate-pulse"
-    >
-      {loading ? "Guardando..." : "Confirmar nuevo Avatar"}
-    </button>
-  )}
-</div>
+            <button 
+              onClick={() => {
+                const ids = Object.keys(AVATARES).map(Number);
+                const currentIndex = ids.indexOf(avatarId);
+                const newIndex = (currentIndex + 1) % ids.length;
+                seleccionarAvatar(ids[newIndex]);
+              }}
+              className="text-white/50 hover:text-white transition-colors text-2xl"
+            >
+              ▶
+            </button>
+          </div>
+          
+          {avatarId !== avatarConfirmado && (
+            <button 
+              onClick={guardarCambiosAvatar}
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl py-2 px-4 transition-all animate-pulse"
+            >
+              {loading ? "Guardando..." : "Confirmar nuevo Avatar"}
+            </button>
+          )}
+        </div>
 
         {/* Formulario Nombre */}
         <form onSubmit={cambiarNombre} className="space-y-4 mb-6">
@@ -288,14 +291,13 @@ export default function AjustesPerfil() {
           </div>
         </div>
 
-        {/*  Botón de Cerrar Sesión (con estilo rojizo glass) */}
+        {/* Botón de Cerrar Sesión */}
         <button 
-    onClick={handleCerrarSesion}
-    className="w-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 font-semibold rounded-xl py-2.5 transition-all backdrop-blur-md mt-4"
-  >
-    Cerrar Sesión
-  </button>
-
+          onClick={handleCerrarSesion}
+          className="w-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 font-semibold rounded-xl py-2.5 transition-all backdrop-blur-md mt-4"
+        >
+          Cerrar Sesión
+        </button>
 
       </GlassCard>
     </div>

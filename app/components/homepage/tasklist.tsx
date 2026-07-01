@@ -18,9 +18,9 @@ export default function TaskList() {
         cargar()
     }, [cargar])
 
-    const handleToggleCompletada = useCallback((taskId: string, completada: boolean) => {
+    const handleToggleCompletada = useCallback((taskId: string, updates: Partial<TaskInterface>) => {
         setTareas(prev =>
-            prev.map(t => t.taskId === taskId ? { ...t, completadaHoy: completada } : t)
+            prev.map(t => t.taskId === taskId ? { ...t, ...updates } : t)
         )
     }, [])
 

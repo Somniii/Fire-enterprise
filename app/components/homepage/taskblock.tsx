@@ -18,7 +18,7 @@ export default function TaskBlock({ opcion }: Props) {
             {opcion === 1 && <NotGlass><TaskList /></NotGlass>}
             {opcion === 2 && <NotGlass><InfiniteTaskList /></NotGlass>}
             {opcion === 3 && <NotGlass><ModificarTareas/></NotGlass>}
-            {opcion === 4 && <Perfil/>}
+            {opcion === 4 && <NotGlass><Perfil/></NotGlass>}
             {opcion === 5 && <Pomodoro/>}
             {opcion === 6 && <GachaPage />}
             {opcion === 8 && <NotGlass><VerRacha /></NotGlass>}

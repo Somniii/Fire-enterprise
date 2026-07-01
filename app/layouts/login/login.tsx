@@ -47,10 +47,8 @@ export default function Login() {
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center px-4 relative">
-      {/* Tu componente de fondo fijo */}
       <ImageBackground />
 
-      {/* Tu componente GlassCard envolviendo toda la interfaz */}
       {/* Le sumamos h-auto para que crezca bien con los inputs y no se corte */}
       <GlassCard className="!h-auto max-w-md w-full flex flex-col justify-center">
         
