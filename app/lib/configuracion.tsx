@@ -6,7 +6,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import GlassCard from '../components/styles/glasscard'; 
 import ImageBackground from '../components/homepage/imagebackground';
-import UpBar from '../components/homepage/upbar'; // <-- ajustá esta ruta a la real de tu UpBar
+import UpBar from '../components/homepage/upbar';
 import { AVATARES } from '../components/avatares/avatares';
 import { motion, AnimatePresence } from 'framer-motion';
 import { setAvatarGuardado as guardarAvatarEnStorage } from '../components/avatares/estado';

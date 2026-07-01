@@ -1,8 +1,10 @@
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
-import { doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc, increment } from "firebase/firestore";
 import { auth, db, googleProvider } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import CreateTask from "../components/homepage/createtask";
+
+
 export interface TaskInterface {
     taskId: string
     activa: boolean
@@ -292,6 +294,14 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
     return tareas
 }
 
+// ── MONEDAS ──────────────────────────────────────────────
+
+export const sumarMonedas = async (cantidad: number) => {
+    const currentUser = auth.currentUser
+    if (!currentUser) throw new Error("No hay usuario logueado")
+
+    await updateDoc(doc(db, "users", currentUser.uid), { coins: increment(cantidad) })
+}
 
 // ── USUARIO ──────────────────────────────────────────────
 
