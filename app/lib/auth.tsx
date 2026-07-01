@@ -323,12 +323,6 @@ export const modificarUsuario = async (cambios: Partial<UserInterface>) => {
 // ── AUTH ──────────────────────────────────────────────
 
 const crearDatosIniciales = async (uid: string, email: string | null, username: string) => {
-    await setDoc(doc(db, "streaks", uid), {
-        userId: uid,
-        currentStreak: 0,
-        longestStreak: 0,
-        lastCompletedDate: null
-    })
 
     await setDoc(doc(db, "users", uid), {
         uid,

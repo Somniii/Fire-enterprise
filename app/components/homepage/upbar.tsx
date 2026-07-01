@@ -8,10 +8,12 @@ import fireSvg from "../../assets/icons/fire.svg"
 import { useRouter } from "next/navigation"
 
 interface Props {
-    onInicio?: () => void // <-- nuevo: se llama cuando ya estás parado en homepage, para resetear la vista interna
+    modoOscuro: boolean
+    onToggleModo: () => void
+    onInicio?: () => void
 }
 
-export default function UpBar({ onInicio }: Props) {
+export default function UpBar({ onInicio,modoOscuro, onToggleModo }: Props) {
     const router = useRouter()
     const [usuario, setUsuario] = useState({
         displayName: "",
@@ -77,11 +79,69 @@ export default function UpBar({ onInicio }: Props) {
 
             {/* Perfil */}
             <div className="relative flex items-center gap-3" ref={menuRef}>
+
+                {/* Toggle modo claro/oscuro */}
+                <button
+                    onClick={onToggleModo}
+                    aria-label={modoOscuro ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+                    className="
+                        flex
+                        h-9
+                        w-9
+                        items-center
+                        justify-center
+                        rounded-full
+                        border
+                        border-neutral-300
+                        bg-white
+                        transition
+                        hover:scale-105
+                        hover:bg-neutral-50
+                    "
+                >
+                    {modoOscuro ? (
+                        // Sol (para volver a modo claro)
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-5 w-5 text-orange-400"
+                        >
+                            <circle cx="12" cy="12" r="4" />
+                            <path d="M12 2v2" />
+                            <path d="M12 20v2" />
+                            <path d="m4.93 4.93 1.41 1.41" />
+                            <path d="m17.66 17.66 1.41 1.41" />
+                            <path d="M2 12h2" />
+                            <path d="M20 12h2" />
+                            <path d="m6.34 17.66-1.41 1.41" />
+                            <path d="m19.07 4.93-1.41 1.41" />
+                        </svg>
+                    ) : (
+                        // Luna (para pasar a modo oscuro)
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-5 w-5 text-neutral-600"
+                        >
+                            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                        </svg>
+                    )}
+                </button>
+
                 <span className="text-sm font-medium text-neutral-700">
                     {usuario.displayName}
                 </span>
 
-                <div className="relative" ref={menuRef}></div>
                 <button
                     onClick={() => setMenuAbierto((prev) => !prev)}
                     className="

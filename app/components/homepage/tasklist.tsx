@@ -8,7 +8,7 @@ import BarraTaskBlock from "./barraTaskBlock";
 
 export default function TaskList() {
     const [tareas, setTareas] = useState<TaskInterface[]>([])
-
+    const hoy = new Date()
     const cargar = useCallback(async () => {
         const data = await obtenerTareas()
         setTareas(data)
@@ -18,6 +18,21 @@ export default function TaskList() {
         cargar()
     }, [cargar])
 
+    const DIAS_DISPLAY = [
+        "Domingo",
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado"
+    ]
+
+    const labelHoy = `Hoy — ${DIAS_DISPLAY[hoy.getDay()]} ${hoy.getDate()} de ${hoy.toLocaleString(
+        "es-AR",
+        { month: "long" }
+    )}`
+    
     const handleToggleCompletada = useCallback((taskId: string, updates: Partial<TaskInterface>) => {
         setTareas(prev =>
             prev.map(t => t.taskId === taskId ? { ...t, ...updates } : t)

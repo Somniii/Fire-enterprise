@@ -93,6 +93,21 @@ export default function Task({task , onToggleCompletada}:Props){
     }
     function cambiarRacha(){
 
+        // Tareas de una sola vez: solo togglean completada, sin tocar racha
+        if(task.tipoRepeticion === ""){
+            const nuevoEstado = !hoyHecho
+            const updates: Partial<TaskInterface> = {
+                completadaHoy: nuevoEstado,
+                ultimaCompletacion: nuevoEstado ? new Date().toISOString() : null,
+                activa: true,
+            }
+            modificarTarea(task.taskId, updates)
+            setHoyHecho(nuevoEstado)
+            onToggleCompletada?.(task.taskId, updates)
+            return
+        }
+
+        // Tareas semanales/mensuales: lógica normal de racha
         if(!hoyHecho){
             const ultimaCompletacion = new Date().toISOString()
             const nuevaRachaActual = rachaActual + 1
@@ -115,7 +130,7 @@ export default function Task({task , onToggleCompletada}:Props){
             setRachaCiclo(nuevaRachaCiclo)
             setMejorRacha(nuevaMejorRacha)
             setHoyHecho(true)
-            onToggleCompletada?.(task.taskId, updates)   // ← pasa todo el objeto
+            onToggleCompletada?.(task.taskId, updates)
 
         }else{
 
@@ -126,9 +141,6 @@ export default function Task({task , onToggleCompletada}:Props){
                     activa: true,
                 }
                 modificarTarea(task.taskId, updates)
-                sumarMonedas(-MONEDAS_POR_TAREA) // <-- restamos monedas al desmarcar la tarea completada
-                    .catch(err => console.error("Error al restar monedas:", err));
-                setRachaActual(0)
                 setHoyHecho(false)
                 onToggleCompletada?.(task.taskId, updates)   // ← agregar acá también
                 return
@@ -150,7 +162,7 @@ export default function Task({task , onToggleCompletada}:Props){
             sumarMonedas(-MONEDAS_POR_TAREA) // <-- restamos monedas al desmarcar la tarea completada
                 .catch(err => console.error("Error al restar monedas:", err));
             setHoyHecho(false)
-            onToggleCompletada?.(task.taskId, updates)   // ← pasa todo el objeto
+            onToggleCompletada?.(task.taskId, updates)
         }
 
     }
