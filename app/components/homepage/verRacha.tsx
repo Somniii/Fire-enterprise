@@ -46,12 +46,15 @@ export default function VerRacha() {
     useEffect(() => { cargar() }, [cargar])
 
     const activas = tareas.filter(t => t.activa)
+    // Solo tareas semanales/mensuales tienen racha; las de tipo "" (una vez) quedan afuera de todo lo relacionado a racha
+    const activasConRacha = activas.filter(t => t.tipoRepeticion !== "")
+
     const mejorRachaGeneral = Math.max(0, ...tareas.map(t => t.mejorRacha ?? 0))
     const rachaActualMasLarga = Math.max(0, ...tareas.map(t => t.rachaActual ?? 0))
     const completadasHoy = tareas.filter(t => t.completadaHoy).length
     const totalHoy = tareas.filter(t => t.activa).length
 
-    const tareaMasConstante = [...activas]
+    const tareaMasConstante = [...activasConRacha]
         .sort((a, b) => (b.rachaActual ?? 0) - (a.rachaActual ?? 0))[0]
 
     const tareaDescuidada = [...activas]
@@ -63,7 +66,7 @@ export default function VerRacha() {
         })[0]
 
     function rankingPorTipo(tipo?: "week" | "month") {
-        const base = tipo ? activas.filter(t => t.tipoRepeticion === tipo) : activas
+        const base = tipo ? activasConRacha.filter(t => t.tipoRepeticion === tipo) : activasConRacha
         return [...base].sort((a, b) => (b.rachaActual ?? 0) - (a.rachaActual ?? 0))
     }
 
@@ -92,8 +95,7 @@ export default function VerRacha() {
                     <div className="flex-1">
                         <p className="text-black text-sm font-medium">{tarea.titulo}</p>
                         <p className="text-neutral-400 text-xs">
-                            {tarea.tipoRepeticion === "week" ? "Semanal" :
-                             tarea.tipoRepeticion === "month" ? "Mensual" : "Una vez"}
+                            {tarea.tipoRepeticion === "week" ? "Semanal" : "Mensual"}
                             {" · "}
                             {formatearFechaRelativa(tarea.ultimaCompletacion)}
                         </p>

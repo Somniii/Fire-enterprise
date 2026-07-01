@@ -94,6 +94,21 @@ export default function Task({task , onToggleCompletada}:Props){
     }
     function cambiarRacha(){
 
+        // Tareas de una sola vez: solo togglean completada, sin tocar racha
+        if(task.tipoRepeticion === ""){
+            const nuevoEstado = !hoyHecho
+            const updates: Partial<TaskInterface> = {
+                completadaHoy: nuevoEstado,
+                ultimaCompletacion: nuevoEstado ? new Date().toISOString() : null,
+                activa: true,
+            }
+            modificarTarea(task.taskId, updates)
+            setHoyHecho(nuevoEstado)
+            onToggleCompletada?.(task.taskId, updates)
+            return
+        }
+
+        // Tareas semanales/mensuales: lógica normal de racha
         if(!hoyHecho){
             const ultimaCompletacion = new Date().toISOString()
 
@@ -115,21 +130,9 @@ export default function Task({task , onToggleCompletada}:Props){
             setRachaCiclo(nuevaRachaCiclo)
             setMejorRacha(nuevaMejorRacha)
             setHoyHecho(true)
-            onToggleCompletada?.(task.taskId, updates)   // ← pasa todo el objeto
+            onToggleCompletada?.(task.taskId, updates)
 
         }else{
-
-            if(task.tipoRepeticion === ""){
-                const updates: Partial<TaskInterface> = {
-                    completadaHoy: false,
-                    ultimaCompletacion: null,
-                    activa: true,
-                }
-                modificarTarea(task.taskId, updates)
-                setHoyHecho(false)
-                onToggleCompletada?.(task.taskId, updates)   // ← agregar acá también
-                return
-            }
 
             const nuevaRachaActual = rachaActual - 1
             const nuevaRachaCiclo = rachaCiclo - 1
@@ -145,7 +148,7 @@ export default function Task({task , onToggleCompletada}:Props){
             setRachaActual(nuevaRachaActual)
             modificarTarea(task.taskId, updates)
             setHoyHecho(false)
-            onToggleCompletada?.(task.taskId, updates)   // ← pasa todo el objeto
+            onToggleCompletada?.(task.taskId, updates)
         }
 
     }

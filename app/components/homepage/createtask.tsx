@@ -39,6 +39,9 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
         return cantidadTrue >= cantidadDiasSemana
 
     }
+    function corroborarMesCantidad(){
+        return selectedDates.length >= diaDelMes
+    }
 
     const DIAS_SEMANA = [
         { id: "domingo", nombre: "Domingo" },
@@ -86,13 +89,20 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
         if(
             repeatType==="week" && !corroborarSemanaCantidad()
         ){
-            alert(`Debes tener al menos ${cantidadDiasSemana} dias seleccionados`)
+            const cantidadSeleccionada = Object.values(diasSeleccionados).filter(v => v).length
+            alert(`Elegiste hacerla ${cantidadDiasSemana} día${cantidadDiasSemana > 1 ? "s" : ""} por semana, pero solo marcaste ${cantidadSeleccionada} día${cantidadSeleccionada !== 1 ? "s" : ""} de la semana en los que podés repetirla. Marcá al menos ${cantidadDiasSemana}.`)
             return;
         }
         if(
             (selectedDates.length===0 && repeatType==="month")
         ){
-            alert('Debes tener al menos un dia del mes seleccionado')
+            alert('Debes seleccionar al menos un día del mes en el calendario')
+            return;
+        }
+        if(
+            repeatType==="month" && !corroborarMesCantidad()
+        ){
+            alert(`Elegiste hacerla ${diaDelMes} día${diaDelMes > 1 ? "s" : ""} por mes, pero solo marcaste ${selectedDates.length} fecha${selectedDates.length !== 1 ? "s" : ""} en el calendario. Marcá al menos ${diaDelMes}.`)
             return;
         }
         const nuevaTarea = {
