@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ESTADOS } from "../../components/avatares/avatares";
 import GlassCard from '../../components/styles/glasscard'; 
-import ImageBackground from "../../components/homepage/imagebackground";
 
 // --- Configuración de la regla proporcional ---
 // 25 min estudio -> 5 min descanso => ratio 1:5
@@ -27,12 +26,11 @@ function formatearTiempo(segundos: number) {
 }
 
 export default function Pomodoro() {
-  // Pantalla 1: configuración / Pantalla 2: timer activo
   const [configurado, setConfigurado] = useState(false);
   const [minutosInput, setMinutosInput] = useState(25);
 
-  const [duracionEstudio, setDuracionEstudio] = useState(0); // segundos
-  const [duracionDescanso, setDuracionDescanso] = useState(0); // segundos
+  const [duracionEstudio, setDuracionEstudio] = useState(0);
+  const [duracionDescanso, setDuracionDescanso] = useState(0);
 
   const [fase, setFase] = useState<FaseSesion>("estudio");
   const [tiempoRestante, setTiempoRestante] = useState(0);
@@ -107,7 +105,6 @@ useEffect(() => {
   }
 }, [tiempoRestante, configurado, corriendo, avanzarFase]);
 
-  // --- Cálculos para el círculo SVG ---
   const duracionFaseActual = fase === "estudio" ? duracionEstudio : duracionDescanso;
   const progreso = duracionFaseActual > 0 ? tiempoRestante / duracionFaseActual : 0;
 
@@ -122,14 +119,13 @@ useEffect(() => {
 })();
 
   const colorFase =
-    fase === "estudio" ? "#f97316" /* orange-500 */ : "#38bdf8" /* sky-400 */;
+    fase === "estudio" ? "#f97316" : "#38bdf8";
 
   // ---------- Pantalla de configuración ----------
   if (!configurado) {
     return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center px-4 relative">
-    <ImageBackground />
-      <GlassCard className="!h-auto max-w-md w-full flex flex-col p-6 items-center">
+    <div className="min-h-screen w-full flex flex-col items-center justify-start pt-16 md:pt-24 px-4 relative">
+      <GlassCard className="!h-auto min-h-[26rem] max-w-md w-full flex flex-col justify-center p-8 items-center">
         <h2 className="text-white font-semibold text-xl mb-1">Modo Estudio</h2>
         <p className="text-white/50 text-sm mb-6 text-center">
           Elegí cuánto tiempo querés estudiar. El descanso se calcula automáticamente.
@@ -168,16 +164,13 @@ useEffect(() => {
   // ---------- Pantalla del timer ----------
   return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center px-4 relative">
-    <ImageBackground />
-    <GlassCard className="!h-auto max-w-md w-full flex flex-col p-6 items-center">
+    <GlassCard className="!h-auto min-h-[30rem] max-w-md w-full flex flex-col justify-center p-8 items-center">
       <p className="text-white/50 text-xs uppercase tracking-widest mb-6">
         {fase === "estudio" ? "Tiempo de estudio" : "Tiempo de descanso"}
       </p>
 
-      {/* Círculo de progreso con imagen de estado en el centro */}
       <div className="relative w-56 h-56 mb-8">
         <svg viewBox="0 0 200 200" className="w-full h-full -rotate-90">
-          {/* Fondo del círculo */}
           <circle
             cx="100"
             cy="100"
@@ -186,7 +179,6 @@ useEffect(() => {
             stroke="rgba(255,255,255,0.08)"
             strokeWidth="10"
           />
-          {/* Progreso */}
           <circle
             cx="100"
             cy="100"
@@ -201,7 +193,6 @@ useEffect(() => {
           />
         </svg>
 
-        {/* Contenido central: imagen de estado + tiempo */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
           {estadoImg && (
             <img
@@ -216,7 +207,6 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Controles */}
       <div className="flex gap-3 w-full">
         <button
           onClick={pausarOReanudar}

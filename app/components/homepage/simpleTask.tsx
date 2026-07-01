@@ -48,6 +48,7 @@ export default function SimpleTask({ task, onToggleCompletada }: Props) {
                     gap-4
                     shadow-sm
                     ${hover && tienePanelExpandible ? "rounded-t-xl" : "rounded-xl"}
+                    ${!task.activa ? "opacity-60" : ""}
                 `}
             >
 
@@ -56,6 +57,24 @@ export default function SimpleTask({ task, onToggleCompletada }: Props) {
                     {task.tipoRepeticion === "week" && "Semanal"}
                     {task.tipoRepeticion === "month" && "Mensual"}
                     {task.tipoRepeticion === "" && "Única"}
+                </span>
+
+                {/* Estado activa/inactiva */}
+                <span
+                    className={`
+                        text-xs
+                        font-medium
+                        px-2
+                        py-0.5
+                        rounded-full
+                        shrink-0
+                        ${task.activa
+                            ? "bg-green-100 text-green-700"
+                            : "bg-neutral-200 text-neutral-500"
+                        }
+                    `}
+                >
+                    {task.activa ? "Activa" : "Inactiva"}
                 </span>
 
                 {/* Título */}

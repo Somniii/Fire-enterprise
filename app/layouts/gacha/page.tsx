@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import GlassCard from '../../components/styles/glasscard';
-import ImageBackground from '../../components/homepage/imagebackground';
 import { AVATARES } from '../../components/avatares/avatares'; 
 import {
   obtenerUsuarioActual,
@@ -102,7 +101,6 @@ export default function GachaPage() {
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-start pt-16 md:pt-24 px-4 relative">
-      <ImageBackground />
 
       <GlassCard className="!h-auto max-w-lg w-full text-center flex flex-col items-center justify-center gap-6 pt-15">
 
