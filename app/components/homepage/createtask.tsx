@@ -419,9 +419,13 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
                         rounded-xl 
                         hover:shadow-xl
                         hover:scale-[1.01]
-
+                        flex
+                        items-center
                         transition-all
-                        duration-200" onClick={isClicked}>
+                        duration-200" onClick={isClicked}
+
+                        >
+                        
                         <div className="flex">
                             <img src={addSvg.src}/>
                             <p className="text-black">Agregar tarea</p>
