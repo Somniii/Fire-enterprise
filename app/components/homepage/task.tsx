@@ -10,6 +10,7 @@ import fireGraySvg from '../../assets/icons/fire-gray.svg'
 import checkbox from '../../assets/icons/check-box.svg'
 import checkboxCheck from '../../assets/icons/check-box-check.svg'
 import fireBlue from '../../assets/icons/fire-blue.svg'
+import CalendarView from "./calendarview";
 
 /*interface Task{
     idTarea: string;
@@ -82,6 +83,7 @@ export default function Task({task}:Props){
 
         //Si estamos a domingo (domigno es 0) y la racha ciclo es mayor a 0(osea si hizo algo de racha) entonces la racha ciclo se pone en 0
         //RESETEO SEMANAL
+        /*
         if(task.tipoRepeticion === "week" && indiceHoy===0 && rachaCiclo >0){
             setRachaCiclo(0)
             //modificarTarea(task.taskId,{rachaCiclo:0})
@@ -91,7 +93,7 @@ export default function Task({task}:Props){
             setRachaCiclo(0)
             //modificarTarea(task.taskId,{rachaCiclo:0})
         }
-
+        */
         if(task.tipoRepeticion!=="" && task.activa===true){
             if(!task.completadaHoy){
 
@@ -117,6 +119,7 @@ export default function Task({task}:Props){
         }
     },[task.taskId, task.tipoRepeticion, task.activa, task.completadaHoy, task.diasSemana, rachaCiclo, task.cantidadDias, rachaActual])
     //se desarmo task en propiedades asi no se manda siempre el cmabio a la firebase y evitas que useeffect se dispare por cualquier minimo cambio
+    
     function verificarDiaYaPuesto(): boolean {
         if(task.ultimaCompletacion == null) return false
 
@@ -174,14 +177,13 @@ export default function Task({task}:Props){
         }
 
     }
-    useEffect(()=>{
-        if(task.rachaCiclo>task.cantidadDias){
-            const fuegoAzul = task.rachaCiclo - task.cantidadDias
-            setDiasExtras(fuegoAzul)
-        }else{
+    useEffect(() => {
+        if (rachaCiclo > task.cantidadDias) {
+            setDiasExtras(rachaCiclo - task.cantidadDias)
+        } else {
             setDiasExtras(0)
         }
-    },[task.rachaActual])
+    }, [rachaCiclo])  // ← ahora sí reacciona al state
     const cantidadDiasMeta = task.cantidadDias??0
     const fuegoGrisFaltantes = Math.max(0,cantidadDiasMeta - rachaCiclo)
     const fuegoAzul = task.rachaCiclo - task.cantidadDias
@@ -249,41 +251,46 @@ export default function Task({task}:Props){
                             <p className="text-black">Mensual</p>
                         )}
                     </div>
-                    
-                        <div className="flex w-[40%] justify-center items-center">
+                        {(task.tipoRepeticion !== "" )&&(
+                            <div className="flex w-[40%] justify-center items-center">
 
-                            {cantidadDiasMeta <= 7 ? (
-                                <>
-                                    {Array.from({ length: Math.min(rachaCiclo, cantidadDiasMeta) }).map((_, indice) => (
-                                        <img key={indice} src={fireOrangeSvg.src} alt="fuego completado" />
-                                    ))}
-
-                                    {Array.from({ length: fuegoGrisFaltantes }).map((_, indice) => (
-                                        <img key={indice} src={fireGraySvg.src} alt="fuego faltante" />
-                                    ))}
-
-                                    {fuegoAzul > 0 &&
-                                        Array.from({ length: diasExtras }).map((_, indice) => (
-                                            <img key={indice} src={fireBlue.src} alt="fuego extra" />
+                                {cantidadDiasMeta <= 7 ? (
+                                    <>
+                                        {Array.from({ length: Math.min(rachaCiclo, cantidadDiasMeta) }).map((_, indice) => (
+                                            <img key={indice} src={fireOrangeSvg.src} alt="fuego completado" />
                                         ))}
-                                </>
-                            ) : (
-                                <div className="flex items-center gap-2">
-                                    <img src={fuegoResumen} className="w-5 h-5" alt="fuego" />
-                                    <p className="font-semibold text-black">
-                                        {rachaCiclo} / {cantidadDiasMeta} días
-                                    </p>
-                                </div>
-                            )}
 
-                        </div>
-                    <div className="flex">
-                        <img
-                            src={hoyHecho ? fireOrangeSvg.src : fireGraySvg.src}
-                            className="w-5 h-5"
-                            alt="racha actual"
-                        />
-                        <p> {rachaActual}</p>
+                                        {Array.from({ length: fuegoGrisFaltantes }).map((_, indice) => (
+                                            <img key={indice} src={fireGraySvg.src} alt="fuego faltante" />
+                                        ))}
+
+                                        {fuegoAzul > 0 &&
+                                            Array.from({ length: diasExtras }).map((_, indice) => (
+                                                <img key={indice} src={fireBlue.src} alt="fuego extra" />
+                                            ))}
+                                    </>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <img src={fuegoResumen} className="w-5 h-5" alt="fuego" />
+                                        <p className="font-semibold text-black">
+                                            {rachaCiclo} / {cantidadDiasMeta} días
+                                        </p>
+                                    </div>
+                                )}
+
+                            </div>
+                        )}
+                    <div >
+                        {(task.tipoRepeticion !== "" )&&(
+                            <div className="flex">
+                                <img
+                                src={hoyHecho ? fireOrangeSvg.src : fireGraySvg.src}
+                                className="w-5 h-5"
+                                alt="racha actual"
+                            />
+                            <p> {rachaActual}</p>
+                            </div>
+                        )}
 
                     </div>
                 </div>
@@ -304,8 +311,8 @@ export default function Task({task}:Props){
                                     task.tipoRepeticion === "week"
                                         ? "h-[5rem]"
                                         : task.tipoRepeticion === "month"
-                                        ? "h-[6rem]"
-                                        : "h-[3rem]"
+                                        ? "h-[10rem]"
+                                        : "h-[2rem]"
                                 }
                                 ${hoverTask ? "rounded-b-xl" : "rounded-xl"}
                             `}
@@ -313,26 +320,39 @@ export default function Task({task}:Props){
                     onMouseEnter={()=>setHoverTask(true)}
                     onMouseLeave={()=>setHoverTask(false)}>
                         <div>
-                            <p className="text-black  text-lg">
-                                {task.nota}
-                            </p>
+
                             {task.tipoRepeticion=="week" &&(
                                 <div className="flex">
                                     <p>Dias semanas que podes completarla</p>
                                     {Array.from({length:task.detallesSemanal?.dias?.length ?? 0}).map((_,indice)=>(
                                         <p key={indice}>{DIAS_ORDENADOS[indice]}</p>
                                     ))}
+                                <p className="text-black  text-lg">
+                                {task.nota}
+                                </p>
                                 </div>
                             )}
-                            {task.tipoRepeticion=="month" &&(
-                                <div className="flex">
-                                    <p>Dias del mes que podes completarla</p>
-                                    {Array.from({length:task.detallesMensual?.fechas.length ?? 0}).map((_,indice)=>(
-                                        <span key={indice}>[ {task.detallesMensual?.fechas[indice]} ]</span>
-                                    ))}
+                            {task.tipoRepeticion == "month" && (
+                                <div className="flex gap-2 flex-wrap">
+                                    <p>Días del mes que podés completarla:</p>
+                                        <CalendarView
+                                            fechas={
+                                                task.detallesMensual?.fechas.map(Number) ?? []
+                                            }
+                                        />
+                                    <p className="text-black  text-lg">
+                                    {task.nota}
+                                     </p>
                                 </div>
                             )}
-                            
+                            {task.tipoRepeticion==""&&(
+                                <div>
+                                    <p>
+                                        {task.nota}
+                                    </p>
+                                </div>
+                            )}
+                                                    
                         </div>
                     </div>
                 )}
