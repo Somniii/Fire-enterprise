@@ -64,7 +64,28 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
 
     const q = query(collection(db, "tasks"), where("userId", "==", currentUser.uid))
     const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => doc.data() as TaskInterface)
+
+    const hoy = new Date()
+    const tareas = snapshot.docs.map(doc => doc.data() as TaskInterface)
+
+    // Por cada tarea verificamos si completadaHoy está desactualizado
+    for (const tarea of tareas) {
+        if (tarea.completadaHoy && tarea.ultimaCompletacion) {
+            const ultimaFecha = new Date(tarea.ultimaCompletacion)
+            const esDeHoy =
+                ultimaFecha.getFullYear() === hoy.getFullYear() &&
+                ultimaFecha.getMonth() === hoy.getMonth() &&
+                ultimaFecha.getDate() === hoy.getDate()
+
+            if (!esDeHoy) {
+                // Ya no es de hoy, reseteamos en Firebase y en el objeto local
+                await updateDoc(doc(db, "tasks", tarea.taskId), { completadaHoy: false })
+                tarea.completadaHoy = false
+            }
+        }
+    }
+
+    return tareas
 }
 
 // ── USUARIO ──────────────────────────────────────────────
