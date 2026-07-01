@@ -93,15 +93,23 @@ export default function Task({task}:Props){
     function cambiarRacha(){
 
         if(!hoyHecho){
-            
-            //Si hoy no se hizo lo prepara para subir a la nube
-            //const nuevaRachaActual = (task.rachaActual ?? 0) + 1
-            //const nuevaRachaCiclo = (task.rachaCiclo ?? 0) + 1
+            const ultimaCompletacion = new Date().toISOString()
+
+            if(task.tipoRepeticion === ""){
+                // Tarea de una sola vez: se completa y se desactiva
+                const updates: Partial<TaskInterface> = {
+                    completadaHoy: true,
+                    ultimaCompletacion: ultimaCompletacion,
+                    activa: false,
+                }
+                modificarTarea(task.taskId, updates)
+                setHoyHecho(true)
+                return
+            }
+
+            // Tareas semanales/mensuales: lógica normal de racha
             const nuevaRachaActual = rachaActual + 1
             const nuevaRachaCiclo = rachaCiclo + 1
-            //aca deberia meter algun if que compare el valor de la bdd y que si tiene 1 menos sume 1 , la cosa es que 
-            //sube 2 valores porque task.rachaActual es el (HACER EN BULLET JOURNAL EL CICLO DE PONERLE UNOE XTRA A LA RACHA)
-            const ultimaCompletacion = new Date().toISOString()
             const updates: Partial<TaskInterface> = {
                 rachaActual: nuevaRachaActual,
                 completadaHoy: true,
@@ -114,10 +122,22 @@ export default function Task({task}:Props){
             setRachaActual(nuevaRachaActual)
             setRachaCiclo(nuevaRachaCiclo)
             setHoyHecho(true)
- 
+
         }else{
-            
-            //si hoy ya se hizo resta uno
+
+            if(task.tipoRepeticion === ""){
+                // Tarea de una sola vez: se destildea y se reactiva
+                const updates: Partial<TaskInterface> = {
+                    completadaHoy: false,
+                    ultimaCompletacion: null,
+                    activa: true,
+                }
+                modificarTarea(task.taskId, updates)
+                setHoyHecho(false)
+                return
+            }
+
+            // Tareas semanales/mensuales: lógica normal de racha
             const nuevaRachaActual = rachaActual - 1
             const nuevaRachaCiclo = rachaCiclo - 1
 
@@ -207,6 +227,9 @@ export default function Task({task}:Props){
                         {task.tipoRepeticion == "month" &&(
                             <p className="text-black">Mensual</p>
                         )}
+                        {task.tipoRepeticion == "" &&(
+                            <p className="text-black">Unica</p>
+                        )}
                     </div>
                         {(task.tipoRepeticion !== "" )&&(
                             <div className="flex w-[40%] justify-center items-center">
@@ -270,7 +293,7 @@ export default function Task({task}:Props){
                                         ? "h-[5rem]"
                                         : task.tipoRepeticion === "month"
                                         ? "h-[12rem]"
-                                        : "h-[2rem]"
+                                        : "h-[3rem]"
                                 }
                             `}
                         onMouseEnter={()=>setHoverTask(true)}

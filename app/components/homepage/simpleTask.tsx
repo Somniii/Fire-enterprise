@@ -96,7 +96,7 @@ export default function SimpleTask({ task, onToggleCompletada }: Props) {
                                 ? "h-[5rem]"
                                 : task.tipoRepeticion === "month"
                                 ? "h-[12rem]"
-                                : "h-[2rem]"
+                                : "h-[3rem]"
                         }
                     `}
                 >

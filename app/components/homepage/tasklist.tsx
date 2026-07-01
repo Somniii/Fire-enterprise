@@ -40,7 +40,7 @@ export default function TaskList() {
     }, [tareas])
 
     return (
-        <div className="w-full flex justify-center px-4">
+        <div className="w-full flex justify-center px-4 flex-col gap-8 p-6">
             <div className="w-full max-w-[66rem] flex flex-col">
                 <BarraTaskBlock />
                 <CreateTask onTareaCreada={cargar} />

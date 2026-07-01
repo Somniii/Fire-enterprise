@@ -73,32 +73,17 @@ export default function InfiniteTaskList() {
     })
 
     return (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-8 p-6">
             {dias.map((dia, i) => (
-                <div key={i}>
-                    <div className="
-                        w-[66rem]
-                        ml-[1rem]
-                        h-12
-                        flex
-                        items-center
-                        px-6
-                        rounded-xl
-                        bg-neutral-100
-                        font-semibold
-                        text-neutral-700
-                        text-sm
-                        uppercase
-                        tracking-widest
-                        shadow-sm
-                        border
-                        mb-3
-                    ">
-                        {dia.label}
+                <div key={i} className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                        <p className="text-xs text-white/40 uppercase tracking-widest">{dia.label}</p>
+                        <div className="flex-1 border-t border-white/10" />
+                        <span className="text-xs text-white/30">{dia.tareas.length}</span>
                     </div>
 
                     {dia.tareas.length === 0 ? (
-                        <p className="text-neutral-400 text-sm px-6 ml-[1rem]">Sin tareas</p>
+                        <p className="text-white/20 text-sm px-1">Sin tareas</p>
                     ) : (
                         <div className="flex flex-col gap-2">
                             {dia.tareas.map(tarea => (
@@ -110,7 +95,7 @@ export default function InfiniteTaskList() {
             ))}
 
             <div ref={loaderRef} className="py-4 text-center">
-                {cargando && <p className="text-neutral-400 text-sm">Cargando más días...</p>}
+                {cargando && <p className="text-white/30 text-sm">Cargando más días...</p>}
             </div>
         </div>
     )

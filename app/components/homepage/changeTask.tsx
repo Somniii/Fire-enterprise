@@ -23,7 +23,6 @@ export default function ChangeTask({ task, onGuardado }: Props) {
     function toggleDiaSemana(dia: string) {
         setDiasSemana(prev => {
             const nuevo = prev.includes(dia) ? prev.filter(d => d !== dia) : [...prev, dia]
-            // si la meta queda mayor a los dias disponibles, la ajustamos
             if (cantidadMeta > nuevo.length) setCantidadMeta(Math.max(1, nuevo.length))
             return nuevo
         })
@@ -70,11 +69,11 @@ export default function ChangeTask({ task, onGuardado }: Props) {
         onGuardado?.()
     }
 
-    const inputClass = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm outline-none focus:border-orange-400/50 transition-all"
-    const labelClass = "text-xs text-white/40 uppercase tracking-widest mb-1"
+    const inputClass = "w-full bg-white border border-neutral-300 rounded-xl px-4 py-2 text-black text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/30 transition-all"
+    const labelClass = "text-xs text-neutral-400 uppercase tracking-widest mb-1"
 
     return (
-        <div className="flex flex-col gap-5 p-6 text-white">
+        <div className="flex flex-col gap-5 p-6 bg-white text-black">
 
             <div className="flex flex-col gap-1">
                 <p className={labelClass}>Nombre</p>
@@ -109,8 +108,8 @@ export default function ChangeTask({ task, onGuardado }: Props) {
                             onClick={() => setTipoRepeticion(op.valor)}
                             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                                 tipoRepeticion === op.valor
-                                    ? "bg-orange-500/30 text-orange-300 border border-orange-400/40"
-                                    : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10"
+                                    ? "bg-orange-400 text-white border border-orange-400"
+                                    : "bg-neutral-100 text-neutral-600 border border-neutral-200 hover:bg-neutral-200"
                             }`}
                         >
                             {op.label}
@@ -129,8 +128,8 @@ export default function ChangeTask({ task, onGuardado }: Props) {
                                 onClick={() => toggleDiaSemana(dia)}
                                 className={`px-3 py-1 rounded-lg text-xs font-medium capitalize transition-all ${
                                     diasSemana.includes(dia)
-                                        ? "bg-orange-500/30 text-orange-300 border border-orange-400/40"
-                                        : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10"
+                                        ? "bg-orange-400 text-white border border-orange-400"
+                                        : "bg-neutral-100 text-neutral-600 border border-neutral-200 hover:bg-neutral-200"
                                 }`}
                             >
                                 {dia}
@@ -150,8 +149,8 @@ export default function ChangeTask({ task, onGuardado }: Props) {
                                 onClick={() => toggleDiaMes(dia)}
                                 className={`w-9 h-9 rounded-lg text-xs font-medium transition-all ${
                                     diasMes.includes(dia)
-                                        ? "bg-orange-500/30 text-orange-300 border border-orange-400/40"
-                                        : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10"
+                                        ? "bg-orange-400 text-white border border-orange-400"
+                                        : "bg-neutral-100 text-neutral-600 border border-neutral-200 hover:bg-neutral-200"
                                 }`}
                             >
                                 {dia}
@@ -166,7 +165,7 @@ export default function ChangeTask({ task, onGuardado }: Props) {
                 <div className="flex flex-col gap-2">
                     <div className="flex justify-between">
                         <p className={labelClass}>Días mínimos por ciclo</p>
-                        <span className="text-xs text-orange-300">{cantidadMeta} / {diasDisponibles}</span>
+                        <span className="text-xs text-orange-500 font-medium">{cantidadMeta} / {diasDisponibles}</span>
                     </div>
                     <input
                         type="range"
@@ -176,19 +175,19 @@ export default function ChangeTask({ task, onGuardado }: Props) {
                         onChange={e => setCantidadMeta(Number(e.target.value))}
                         className="w-full accent-orange-400"
                     />
-                    <div className="flex justify-between text-xs text-white/30">
+                    <div className="flex justify-between text-xs text-neutral-400">
                         <span>1</span>
                         <span>{diasDisponibles}</span>
                     </div>
                 </div>
             )}
 
-            <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-4 py-3">
-                <p className="text-sm text-white/70">Tarea activa</p>
+            <div className="flex items-center justify-between bg-neutral-100 border border-neutral-200 rounded-xl px-4 py-3">
+                <p className="text-sm text-neutral-600">Tarea activa</p>
                 <button
                     onClick={() => setActiva(prev => !prev)}
                     className={`w-12 h-6 rounded-full transition-all relative ${
-                        activa ? "bg-orange-500" : "bg-white/20"
+                        activa ? "bg-orange-400" : "bg-neutral-300"
                     }`}
                 >
                     <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
@@ -202,8 +201,8 @@ export default function ChangeTask({ task, onGuardado }: Props) {
                 disabled={guardando}
                 className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
                     guardado
-                        ? "bg-green-500/20 text-green-300 border border-green-400/30"
-                        : "bg-orange-500/20 text-orange-300 border border-orange-400/30 hover:bg-orange-500/30"
+                        ? "bg-green-100 text-green-600 border border-green-300"
+                        : "bg-orange-400 text-white border border-orange-400 hover:bg-orange-500"
                 }`}
             >
                 {guardando ? "Guardando..." : guardado ? "✓ Guardado" : "Guardar cambios"}
