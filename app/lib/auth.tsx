@@ -21,6 +21,7 @@ export interface TaskInterface {
     detallesMensual: { cantidadDias: number; fechas: string[] } | null
     diasSemana?: string[]         // legacy, usar detallesSemanal.dias
     fechasMes?: string[]          // legacy, usar detallesMensual.fechas
+    cantidadCiclos?: number
 }
 
 export interface UserInterface {
@@ -45,13 +46,6 @@ export const crearTarea = async (task: TaskInterface) => {
     })
 }
 
-export const modificarTarea = async (taskId: string, cambios: Partial<TaskInterface>) => {
-    const currentUser = auth.currentUser
-    if (!currentUser) throw new Error("No hay usuario logueado")
-
-    await updateDoc(doc(db, "tasks", taskId), { ...cambios })
-}
-
 export const obtenerTareas = async (): Promise<TaskInterface[]> => {
     const currentUser = await new Promise<import("firebase/auth").User | null>((resolve) => {
         const unsub = onAuthStateChanged(auth, (user) => {
@@ -66,10 +60,12 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
     const snapshot = await getDocs(q)
 
     const hoy = new Date()
+    const DIAS_ORDENADOS = ["domingo","lunes","martes","miercoles","jueves","viernes","sabado"]
     const tareas = snapshot.docs.map(doc => doc.data() as TaskInterface)
 
-    // Por cada tarea verificamos si completadaHoy está desactualizado
     for (const tarea of tareas) {
+
+        // 1. RESET completadaHoy si no es de hoy
         if (tarea.completadaHoy && tarea.ultimaCompletacion) {
             const ultimaFecha = new Date(tarea.ultimaCompletacion)
             const esDeHoy =
@@ -78,14 +74,55 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
                 ultimaFecha.getDate() === hoy.getDate()
 
             if (!esDeHoy) {
-                // Ya no es de hoy, reseteamos en Firebase y en el objeto local
                 await updateDoc(doc(db, "tasks", tarea.taskId), { completadaHoy: false })
                 tarea.completadaHoy = false
             }
         }
-        
+
+        // 2. RESET ciclo semanal (cada domingo)
+        if (tarea.tipoRepeticion === "week" && hoy.getDay() === 0 && (tarea.rachaCiclo ?? 0) > 0) {
+            const nuevosCiclos = (tarea.cantidadCiclos ?? 0) + 1
+            await updateDoc(doc(db, "tasks", tarea.taskId), { rachaCiclo: 0, cantidadCiclos: nuevosCiclos })
+            tarea.rachaCiclo = 0
+            tarea.cantidadCiclos = nuevosCiclos
+        }
+
+        // 3. RESET ciclo mensual (cada día 1)
+        if (tarea.tipoRepeticion === "month" && hoy.getDate() === 1 && (tarea.rachaCiclo ?? 0) > 0) {
+            const nuevosCiclos = (tarea.cantidadCiclos ?? 0) + 1
+            await updateDoc(doc(db, "tasks", tarea.taskId), { rachaCiclo: 0, cantidadCiclos: nuevosCiclos })
+            tarea.rachaCiclo = 0
+            tarea.cantidadCiclos = nuevosCiclos
+        }
+
+        // 4. RACHA A 0 si no puede completar el ciclo (solo desde el segundo ciclo)
+        if ((tarea.cantidadCiclos ?? 0) > 0 && !tarea.completadaHoy) {
+
+            if (tarea.tipoRepeticion === "week" && tarea.detallesSemanal) {
+                const diasRestantes = tarea.detallesSemanal.dias.filter(dia =>
+                    DIAS_ORDENADOS.indexOf(dia) > hoy.getDay()
+                ).length
+                const faltanCompletar = tarea.cantidadDias - (tarea.rachaCiclo ?? 0)
+
+                if (faltanCompletar > diasRestantes) {
+                    await updateDoc(doc(db, "tasks", tarea.taskId), { rachaActual: 0 })
+                    tarea.rachaActual = 0
+                }
+            }
+
+            if (tarea.tipoRepeticion === "month" && tarea.detallesMensual) {
+                const diasRestantes = tarea.detallesMensual.fechas.filter(fecha =>
+                    Number(fecha) > hoy.getDate()
+                ).length
+                const faltanCompletar = tarea.cantidadDias - (tarea.rachaCiclo ?? 0)
+
+                if (faltanCompletar > diasRestantes) {
+                    await updateDoc(doc(db, "tasks", tarea.taskId), { rachaActual: 0 })
+                    tarea.rachaActual = 0
+                }
+            }
+        }
     }
-    
 
     return tareas
 }

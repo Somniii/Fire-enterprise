@@ -10,6 +10,7 @@ import fireGraySvg from '../../assets/icons/fire-gray.svg'
 import checkbox from '../../assets/icons/check-box.svg'
 import checkboxCheck from '../../assets/icons/check-box-check.svg'
 import fireBlue from '../../assets/icons/fire-blue.svg'
+import CalendarView from "./calendarview";
 
 /*interface Task{
     idTarea: string;
@@ -277,13 +278,17 @@ export default function Task({task}:Props){
                             )}
 
                         </div>
-                    <div className="flex">
-                        <img
-                            src={hoyHecho ? fireOrangeSvg.src : fireGraySvg.src}
-                            className="w-5 h-5"
-                            alt="racha actual"
-                        />
-                        <p> {rachaActual}</p>
+                    <div >
+                        {(task.tipoRepeticion !== "" )&&(
+                            <div className="flex">
+                                <img
+                                src={hoyHecho ? fireOrangeSvg.src : fireGraySvg.src}
+                                className="w-5 h-5"
+                                alt="racha actual"
+                            />
+                            <p> {rachaActual}</p>
+                            </div>
+                        )}
 
                     </div>
                 </div>
@@ -304,8 +309,8 @@ export default function Task({task}:Props){
                                     task.tipoRepeticion === "week"
                                         ? "h-[5rem]"
                                         : task.tipoRepeticion === "month"
-                                        ? "h-[6rem]"
-                                        : "h-[3rem]"
+                                        ? "h-[10rem]"
+                                        : "h-[2rem]"
                                 }
                                 ${hoverTask ? "rounded-b-xl" : "rounded-xl"}
                             `}
@@ -313,26 +318,39 @@ export default function Task({task}:Props){
                     onMouseEnter={()=>setHoverTask(true)}
                     onMouseLeave={()=>setHoverTask(false)}>
                         <div>
-                            <p className="text-black  text-lg">
-                                {task.nota}
-                            </p>
+
                             {task.tipoRepeticion=="week" &&(
                                 <div className="flex">
                                     <p>Dias semanas que podes completarla</p>
                                     {Array.from({length:task.detallesSemanal?.dias?.length ?? 0}).map((_,indice)=>(
                                         <p key={indice}>{DIAS_ORDENADOS[indice]}</p>
                                     ))}
+                                <p className="text-black  text-lg">
+                                {task.nota}
+                                </p>
                                 </div>
                             )}
-                            {task.tipoRepeticion=="month" &&(
-                                <div className="flex">
-                                    <p>Dias del mes que podes completarla</p>
-                                    {Array.from({length:task.detallesMensual?.fechas.length ?? 0}).map((_,indice)=>(
-                                        <span key={indice}>[ {task.detallesMensual?.fechas[indice]} ]</span>
-                                    ))}
+                            {task.tipoRepeticion == "month" && (
+                                <div className="flex gap-2 flex-wrap">
+                                    <p>Días del mes que podés completarla:</p>
+                                        <CalendarView
+                                            fechas={
+                                                task.detallesMensual?.fechas.map(Number) ?? []
+                                            }
+                                        />
+                                    <p className="text-black  text-lg">
+                                    {task.nota}
+                                     </p>
                                 </div>
                             )}
-                            
+                            {task.tipoRepeticion==""&&(
+                                <div>
+                                    <p>
+                                        {task.nota}
+                                    </p>
+                                </div>
+                            )}
+                                                    
                         </div>
                     </div>
                 )}
