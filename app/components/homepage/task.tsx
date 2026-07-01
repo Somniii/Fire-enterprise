@@ -15,7 +15,7 @@ import CalendarView from "./calendarview";
 
 interface Props{
     task:TaskInterface
-    onToggleCompletada?: (taskId: string, completada: boolean) => void
+    onToggleCompletada?: (taskId: string, updates: Partial<TaskInterface>) => void
 }
 
 
@@ -115,7 +115,7 @@ export default function Task({task , onToggleCompletada}:Props){
             setRachaCiclo(nuevaRachaCiclo)
             setMejorRacha(nuevaMejorRacha)
             setHoyHecho(true)
-            onToggleCompletada?.(task.taskId, true)
+            onToggleCompletada?.(task.taskId, updates)   // ← pasa todo el objeto
 
         }else{
 
@@ -127,10 +127,10 @@ export default function Task({task , onToggleCompletada}:Props){
                 }
                 modificarTarea(task.taskId, updates)
                 setHoyHecho(false)
+                onToggleCompletada?.(task.taskId, updates)   // ← agregar acá también
                 return
             }
 
-            // Tareas semanales/mensuales: lógica normal de racha
             const nuevaRachaActual = rachaActual - 1
             const nuevaRachaCiclo = rachaCiclo - 1
 
@@ -145,7 +145,7 @@ export default function Task({task , onToggleCompletada}:Props){
             setRachaActual(nuevaRachaActual)
             modificarTarea(task.taskId, updates)
             setHoyHecho(false)
-            onToggleCompletada?.(task.taskId, false)
+            onToggleCompletada?.(task.taskId, updates)   // ← pasa todo el objeto
         }
 
     }
@@ -158,7 +158,7 @@ export default function Task({task , onToggleCompletada}:Props){
     }, [rachaCiclo])  // ← ahora sí reacciona al state
     const cantidadDiasMeta = task.cantidadDias??0
     const fuegoGrisFaltantes = Math.max(0,cantidadDiasMeta - rachaCiclo)
-    const fuegoAzul = task.rachaCiclo - task.cantidadDias
+    const fuegoAzul = rachaCiclo - task.cantidadDias
     //aca calculamos los dias faltantes se pone el ?? 0 por que si la racha ciclo esta vacia se reemplaza por 0
 
     //En esta parte del codigo que se usa cuando la tarea tiene mas de 7 dias si la tarea no esta hecha el fuego es gris , sino naranja y si supero la cantidad de dias que tenia que hacer azul
