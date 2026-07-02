@@ -92,12 +92,6 @@ const avanzarFase = useCallback(() => {
   };
 }, [corriendo, configurado]);
 
-useEffect(() => {
-  if (tiempoRestante === 0 && configurado && corriendo) {
-    avanzarFase();
-  }
-}, [tiempoRestante, configurado, corriendo, avanzarFase]);
-
 // Efecto separado que detecta cuando llega a 0 y avanza la fase
 useEffect(() => {
   if (tiempoRestante === 0 && configurado && corriendo) {

@@ -64,12 +64,6 @@ export default function Task({task , onToggleCompletada}:Props){
                     const indiceDiaPermitido = DIAS_ORDENADOS.indexOf(dia);
                     return indiceDiaPermitido >= indiceHoy;
                 }).length 
-                if(cantidadDiasFaltan >diasDisponiblesRestantes){
-                    //Esto esta mal implementado
-                    //modificarTarea(task.taskId,{rachaActual:0})
-                    
-                    //setRachaActual(0)
-                }
                 //VEMOS SI HOY ES DOMINGO
 
                 

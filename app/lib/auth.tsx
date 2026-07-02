@@ -122,9 +122,6 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
     const DIAS_ORDENADOS = ["domingo","lunes","martes","miercoles","jueves","viernes","sabado"]
     const tareas = snapshot.docs.map(doc => doc.data() as TaskInterface)
     for (const tarea of tareas) {
-        if (tarea.detallesSemanal?.finSemana) {
-             const finSemanaAux = new Date(tarea.detallesSemanal.finSemana);
-        }   
 
 
         // 1. RESET completadaHoy si no es de hoy
@@ -349,7 +346,7 @@ export const loginWithEmail = async (email: string, password: string) => {
 export const loginWithGoogle = async () => {
     const { user } = await signInWithPopup(auth, googleProvider)
 
-    const snap = await getDoc(doc(db, "streaks", user.uid))
+    const snap = await getDoc(doc(db, "users", user.uid))
     if (!snap.exists()) {
         await crearDatosIniciales(user.uid, user.email, user.displayName || "Usuario Fire")
     }
