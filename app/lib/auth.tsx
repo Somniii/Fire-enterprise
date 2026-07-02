@@ -119,7 +119,11 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
     const snapshot = await getDocs(q)
 
     const hoy = new Date()
-    const DIAS_ORDENADOS = ["domingo","lunes","martes","miercoles","jueves","viernes","sabado"]
+    const DIAS_ORDENADOS = ["lunes","martes","miercoles","jueves","viernes","sabado","domingo"]
+    function indiceSemanaLunes(fecha: Date): number {
+        const dia = fecha.getDay()
+        return dia === 0 ? 6 : dia - 1   // domingo pasa a ser el último día (6)
+    }
     const tareas = snapshot.docs.map(doc => doc.data() as TaskInterface)
     for (const tarea of tareas) {
 
@@ -257,26 +261,20 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
         // 4. RACHA A 0 si no puede completar el ciclo (solo desde el segundo ciclo)
         if ((tarea.cantidadCiclos ?? 0) > 0 && !tarea.completadaHoy) {
             if (tarea.tipoRepeticion === "week" && tarea.detallesSemanal) {
-                const indiceHoy = hoy.getDay()
-                // domingo (0) no cuenta como "día restante", la semana ya terminó para el usuario
-                // pero tampoco penalizamos hasta el lunes
-                if (indiceHoy === 0) {
-                    // Es domingo: no penalizamos, dejamos que el reset del lunes lo maneje
-                } else {
-                    const diasRestantes = tarea.detallesSemanal.dias.filter(dia =>
-                        DIAS_ORDENADOS.indexOf(dia) > indiceHoy
-                    ).length
-                    const faltanCompletar = tarea.cantidadDias - (tarea.rachaCiclo ?? 0)
-                    if (faltanCompletar > diasRestantes) {
-                        await updateDoc(doc(db, "tasks", tarea.taskId), { rachaActual: 0 })
-                        tarea.rachaActual = 0
-                    }
+                const indiceHoy = indiceSemanaLunes(hoy)
+                const diasRestantes = tarea.detallesSemanal.dias.filter(dia =>
+                    DIAS_ORDENADOS.indexOf(dia) >= indiceHoy
+                ).length
+                const faltanCompletar = tarea.cantidadDias - (tarea.rachaCiclo ?? 0)
+                if (faltanCompletar > diasRestantes) {
+                    await updateDoc(doc(db, "tasks", tarea.taskId), { rachaActual: 0 })
+                    tarea.rachaActual = 0
                 }
             }
 
             if (tarea.tipoRepeticion === "month" && tarea.detallesMensual) {
                 const diasRestantes = tarea.detallesMensual.fechas.filter(fecha =>
-                    Number(fecha) > hoy.getDate()
+                    Number(fecha) >= hoy.getDate()
                 ).length
                 const faltanCompletar = tarea.cantidadDias - (tarea.rachaCiclo ?? 0)
 
