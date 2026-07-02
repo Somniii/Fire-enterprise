@@ -141,7 +141,6 @@ export default function AjustesPerfil() {
 
    return (
     <div className="min-h-screen w-full flex flex-col items-center justify-start pt-16 md:pt-24 px-4 relative">
-      <UpBar />
       <ImageBackground />
 
       <GlassCard className="!h-auto max-w-md w-full flex flex-col p-6 border border-white/5 backdrop-blur-md shadow-2xl rounded-2xl relative">
