@@ -125,12 +125,12 @@ export default function SimpleTask({ task, onToggleCompletada }: Props) {
                                 <div className="flex items-center gap-2">
                                     <p className="text-sm font-medium text-neutral-500">Días de repetición:</p>
                                     <div className="flex gap-1.5">
-                                        {Array.from({ length: task.detallesSemanal?.dias?.length ?? 0 }).map((_, indice) => (
+                                        {(task.detallesSemanal?.dias ?? []).map((dia, indice) => (
                                             <span
                                                 key={indice}
                                                 className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-medium"
                                             >
-                                                {DIAS_ORDENADOS[indice]}
+                                                {dia}
                                             </span>
                                         ))}
                                     </div>
