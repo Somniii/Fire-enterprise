@@ -69,7 +69,7 @@ export default function TaskList() {
         () => tareasMostrar.filter(t => t.completadaHoy),
         [tareasMostrar]
     )
-
+    //Esta seccion sirve para mandar las pendientes y las completadas una vze esta puesta en el return
     const Seccion = ({ titulo, lista }: { titulo: string, lista: TaskInterface[] }) => (
         <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">

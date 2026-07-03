@@ -87,6 +87,7 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
 
         // Creamos el objeto final con toda la información
         if(
+            //Si es de tipo Week y los dias de semana que pone no son menores a la cantidad de dias que quiere hacer
             repeatType==="week" && !corroborarSemanaCantidad()
         ){
             const cantidadSeleccionada = Object.values(diasSeleccionados).filter(v => v).length
@@ -94,17 +95,20 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
             return;
         }
         if(
+            //Si no selecciono fechas en el calendario y es de tipo mes
             (selectedDates.length===0 && repeatType==="month")
         ){
             alert('Debes seleccionar al menos un día del mes en el calendario')
             return;
         }
         if(
+            //Si selecciono fechas pero la cantidad de fechas es menor a la cantidad de dias que puso para hacer
             repeatType==="month" && !corroborarMesCantidad()
         ){
             alert(`Elegiste hacerla ${diaDelMes} día${diaDelMes > 1 ? "s" : ""} por mes, pero solo marcaste ${selectedDates.length} fecha${selectedDates.length !== 1 ? "s" : ""} en el calendario. Marcá al menos ${diaDelMes}.`)
             return;
         }
+        //Se crea nuevaTarea que luego se va a guardar en el firebase
         const nuevaTarea = {
    
             activa:true,
@@ -134,36 +138,11 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
             detallesMensual: repeatType === "month" ? {
                 cantidadDias: diaDelMes,
                 fechas: selectedDates.map(date=>date.getDate().toString()),
+                //Guarda cuando se tiene que checkear en el auth para que la cicloracha sea igual a 0
                 finMes: repeatType === "month" ? getProximoDia1(fechaCreacion) : null,
             } : null
         };
-/*
-            alert(
-            `¡Tarea Creada con éxito!
-            Titulo: ${nuevaTarea.titulo}
-            Detalle: ${nuevaTarea.nota}
-            Tipo: ${nuevaTarea.tipoRepeticion}
-            Mensual: ${JSON.stringify(nuevaTarea.detallesMensual)}
-            Semanal: ${JSON.stringify(nuevaTarea.detallesSemanal)}
-            Dias mensual: ${JSON.stringify(nuevaTarea.detallesMensual?.fechas)}
-            `
-            
-            )
-        console.log("¡Tarea Creada con éxito!", nuevaTarea);
-        setSelectedDates([])
-        setDiaDelMes(1)
-        setCantidadDiasSemana(1)
-        setDiasSeleccionados({
-            domingo: true,
-            lunes: true,
-            martes: true,
-            miercoles: true,
-            jueves: true,
-            viernes: true,
-            sabado: true,
-        });*/
 
-        
         // Aquí podrías enviar 'nuevaTarea' a tu API / Base de datos o a un componente padre.
         await crearTarea(nuevaTarea)
         onTareaCreada()
@@ -190,7 +169,7 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
     if(isExpanded){
         return(
             <>
-            {/*Este div controla todo */}
+            {/*Este div controla todo el estilo de className */}
             <div className={`bg-white w-full ml-[1rem] mt-[1.5rem] rounded-xl p-6 flex gap-6 ${repeatType==="week" ? "h-[26rem] " :  repeatType==="month" ? "h-[29rem]" : "h-[17rem] " }`}>
 
                 {/*Columna izquierda: formulario */}

@@ -17,17 +17,21 @@ export default function ChangeTask({ task, onGuardado }: Props) {
     const [diasSemana, setDiasSemana] = useState<string[]>(task.detallesSemanal?.dias ?? [])
     const [diasMes, setDiasMes] = useState<string[]>(task.detallesMensual?.fechas ?? [])
     const [cantidadMeta, setCantidadMeta] = useState(task.cantidadDias ?? 1)
+    //Flags mientras espera la respuesta de firebase
     const [guardando, setGuardando] = useState(false)
     const [guardado, setGuardado] = useState(false)
 
+
     function toggleDiaSemana(dia: string) {
+         //Funcion para cambiar los dias de semana
         setDiasSemana(prev => {
             const nuevo = prev.includes(dia) ? prev.filter(d => d !== dia) : [...prev, dia]
+            //aca se fija si al sacar un dia la meta qiueda mas alta que los dias disponibles la recorta
             if (cantidadMeta > nuevo.length) setCantidadMeta(Math.max(1, nuevo.length))
             return nuevo
         })
     }
-
+    //Misma logica pero para dias del mes
     function toggleDiaMes(dia: string) {
         setDiasMes(prev => {
             const nuevo = prev.includes(dia) ? prev.filter(d => d !== dia) : [...prev, dia]
@@ -35,9 +39,11 @@ export default function ChangeTask({ task, onGuardado }: Props) {
             return nuevo
         })
     }
-
+    //Cantidad de dias masrcados segun el tipo de repeticion actual
     const diasDisponibles = tipoRepeticion === "week" ? diasSemana.length : diasMes.length
 
+
+    //Funcion para enviar cambios a firebase
     async function guardar() {
         setGuardando(true)
         const updates: Partial<TaskInterface> = {
@@ -46,6 +52,7 @@ export default function ChangeTask({ task, onGuardado }: Props) {
             activa,
             tipoRepeticion,
             cantidadDias: cantidadMeta,
+            //Dependiendo el tipo de repeticion manda los cambios de semana o de mes
             ...(tipoRepeticion === "week" && {
                 detallesSemanal: {
                     dias: diasSemana,
@@ -62,6 +69,7 @@ export default function ChangeTask({ task, onGuardado }: Props) {
             }),
 
         }
+        //llamada a firestore
         await modificarTarea(task.taskId, updates)
         setGuardando(false)
         setGuardado(true)
@@ -71,7 +79,7 @@ export default function ChangeTask({ task, onGuardado }: Props) {
 
     const inputClass = "w-full bg-white border border-neutral-300 rounded-xl px-4 py-2 text-black text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/30 transition-all"
     const labelClass = "text-xs text-neutral-400 uppercase tracking-widest mb-1"
-
+    
     return (
         <div className="flex flex-col gap-5 p-6 bg-white text-black">
 
