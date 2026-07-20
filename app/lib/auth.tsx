@@ -143,121 +143,69 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
         }
 
         // 2. RESET ciclo semanal
-        if(tarea.tipoRepeticion == "week"){
-            if (
-                tarea.detallesSemanal?.finSemana &&
+        if (tarea.tipoRepeticion === "week" && tarea.detallesSemanal) {
+            while (
+                tarea.detallesSemanal.finSemana &&
                 hoy > new Date(tarea.detallesSemanal.finSemana)
             ) {
-                //Si la semana termino y la fecha actual es mayor a la ultimo dia de la semana que podria hacerlo oesa 
-                //lunes a las 00 se realiza la verificacion
-                if(tarea.cantidadCiclos===0){
-                    //si es su primer ciclo entonces se le suma todo sin importar ya que
-                    //si arranco desde el sabado y hizo un dia solo no lo va a perder porque no pudo hacer lo otro
-                    //asi que no pasa nada
-                    tarea.cantidadCiclos = (tarea.cantidadCiclos ?? 0) + 1;
-                    tarea.fechaCiclo = hoy.toISOString()
-                    tarea.rachaCiclo = 0
-                    //tarea.detallesSemanal.finSemana = getProximoLunes(hoy)
+                const cicloAnteriorCumplido = tarea.cantidadCiclos === 0
+                    ? true
+                    : (tarea.rachaCiclo ?? 0) >= tarea.cantidadDias
+
+                tarea.rachaCiclo = 0
+                tarea.fechaCiclo = hoy.toISOString()
+
+                if (cicloAnteriorCumplido) {
+                    tarea.cantidadCiclos = (tarea.cantidadCiclos ?? 0) + 1
                     tarea.detallesSemanal.finSemana = getProximoLunes(new Date(tarea.detallesSemanal.finSemana))
-
-                    await updateDoc(doc(db, "tasks", tarea.taskId), {
-                        cantidadCiclos: tarea.cantidadCiclos,
-                        fechaCiclo: tarea.fechaCiclo,
-                        rachaCiclo: 0,
-                        detallesSemanal: tarea.detallesSemanal
-                    })
-                }else{
-                    if(tarea.rachaCiclo>=tarea.cantidadDias){
-                        //aca lo hizo bien y no pasa nada, se le suma un ciclo y se cambia la fecha 
-                        tarea.cantidadCiclos = (tarea.cantidadCiclos ?? 0) + 1;
-                        tarea.fechaCiclo = hoy.toISOString()
-                        tarea.rachaCiclo = 0
-                        //tarea.detallesSemanal.finSemana = getProximoLunes(hoy)
-                        tarea.detallesSemanal.finSemana = getProximoLunes(new Date(tarea.detallesSemanal.finSemana))
-                        await updateDoc(doc(db, "tasks", tarea.taskId), {
-                            cantidadCiclos: tarea.cantidadCiclos,
-                            fechaCiclo: tarea.fechaCiclo,
-                            rachaCiclo: 0,
-                            detallesSemanal: tarea.detallesSemanal
-                        })
-
-                    }else{
-                        tarea.cantidadCiclos = (tarea.cantidadCiclos ?? 0) + 1;
-                        tarea.fechaCiclo = hoy.toISOString()
-                        tarea.rachaCiclo = 0
-                        tarea.rachaActual =0
-                        //tarea.detallesSemanal.finSemana = getProximoLunes(hoy)
-                        tarea.detallesSemanal.finSemana = getProximoLunes(new Date(tarea.detallesSemanal.finSemana))
-
-                        await updateDoc(doc(db, "tasks", tarea.taskId), {
-                            cantidadCiclos: tarea.cantidadCiclos,
-                            fechaCiclo: tarea.fechaCiclo,
-                            rachaCiclo: 0,
-                            rachaActual: 0,
-                            detallesSemanal: tarea.detallesSemanal
-                })
-                    }
-
+                } else {
+                    tarea.rachaActual = 0
+                    tarea.cantidadCiclos = 0
+                    tarea.detallesSemanal.finSemana = getProximoLunes(hoy)
                 }
-                // La semana terminó
-            }else{
-
             }
-        }
-        if(tarea.tipoRepeticion==="month"){
 
+            await updateDoc(doc(db, "tasks", tarea.taskId), {
+                cantidadCiclos: tarea.cantidadCiclos,
+                fechaCiclo: tarea.fechaCiclo,
+                rachaCiclo: tarea.rachaCiclo,
+                rachaActual: tarea.rachaActual,
+                detallesSemanal: tarea.detallesSemanal
+            })
         }
-
         // 3. RESET ciclo mensual
-        if (tarea.tipoRepeticion === "month") {
-            if (
-                tarea.detallesMensual?.finMes &&
+        if (tarea.tipoRepeticion === "month" && tarea.detallesMensual) {
+            while (
+                tarea.detallesMensual.finMes &&
                 hoy > new Date(tarea.detallesMensual.finMes)
             ) {
-                if (tarea.cantidadCiclos === 0) {
+                const cicloAnteriorCumplido = tarea.cantidadCiclos === 0
+                    ? true
+                    : (tarea.rachaCiclo ?? 0) >= tarea.cantidadDias
+
+                tarea.rachaCiclo = 0
+                tarea.fechaCiclo = hoy.toISOString()
+
+                if (cicloAnteriorCumplido) {
+                    // se cumplió: sigue la racha, avanza el ciclo en la grilla fija normal
                     tarea.cantidadCiclos = (tarea.cantidadCiclos ?? 0) + 1
-                    tarea.fechaCiclo = hoy.toISOString()
-                    tarea.rachaCiclo = 0
                     tarea.detallesMensual.finMes = getProximoDia1(new Date(tarea.detallesMensual.finMes))
-
-                    await updateDoc(doc(db, "tasks", tarea.taskId), {
-                        cantidadCiclos: tarea.cantidadCiclos,
-                        fechaCiclo: tarea.fechaCiclo,
-                        rachaCiclo: 0,
-                        detallesMensual: tarea.detallesMensual
-                    })
                 } else {
-                    if (tarea.rachaCiclo >= tarea.cantidadDias) {
-                        tarea.cantidadCiclos = (tarea.cantidadCiclos ?? 0) + 1
-                        tarea.fechaCiclo = hoy.toISOString()
-                        tarea.rachaCiclo = 0
-                        tarea.detallesMensual.finMes = getProximoDia1(new Date(tarea.detallesMensual.finMes))
-
-                        await updateDoc(doc(db, "tasks", tarea.taskId), {
-                            cantidadCiclos: tarea.cantidadCiclos,
-                            fechaCiclo: tarea.fechaCiclo,
-                            rachaCiclo: 0,
-                            detallesMensual: tarea.detallesMensual
-                        })
-                    } else {
-                        tarea.cantidadCiclos = (tarea.cantidadCiclos ?? 0) + 1
-                        tarea.fechaCiclo = hoy.toISOString()
-                        tarea.rachaCiclo = 0
-                        tarea.rachaActual = 0
-                        tarea.detallesMensual.finMes = getProximoDia1(new Date(tarea.detallesMensual.finMes))
-
-                        await updateDoc(doc(db, "tasks", tarea.taskId), {
-                            cantidadCiclos: tarea.cantidadCiclos,
-                            fechaCiclo: tarea.fechaCiclo,
-                            rachaCiclo: 0,
-                            rachaActual: 0,
-                            detallesMensual: tarea.detallesMensual
-                        })
-                    }
+                    // se perdió: la racha vuelve a 0 y arranca un ciclo "gratis" desde HOY
+                    tarea.rachaActual = 0
+                    tarea.cantidadCiclos = 0
+                    tarea.detallesMensual.finMes = getProximoDia1(hoy)
                 }
             }
-        }
 
+            await updateDoc(doc(db, "tasks", tarea.taskId), {
+                cantidadCiclos: tarea.cantidadCiclos,
+                fechaCiclo: tarea.fechaCiclo,
+                rachaCiclo: tarea.rachaCiclo,
+                rachaActual: tarea.rachaActual,
+                detallesMensual: tarea.detallesMensual
+            })
+        }
         // 4. RACHA A 0 si no puede completar el ciclo (solo desde el segundo ciclo)
         if ((tarea.cantidadCiclos ?? 0) > 0 && !tarea.completadaHoy) {
             if (tarea.tipoRepeticion === "week" && tarea.detallesSemanal) {
@@ -267,8 +215,10 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
                 ).length
                 const faltanCompletar = tarea.cantidadDias - (tarea.rachaCiclo ?? 0)
                 if (faltanCompletar > diasRestantes) {
-                    await updateDoc(doc(db, "tasks", tarea.taskId), { rachaActual: 0 })
+                    await updateDoc(doc(db, "tasks", tarea.taskId), { rachaActual: 0  })
                     tarea.rachaActual = 0
+                    tarea.rachaCiclo = 0
+                    tarea.cantidadCiclos = 0
                 }
             }
 
@@ -281,6 +231,8 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
                 if (faltanCompletar > diasRestantes) {
                     await updateDoc(doc(db, "tasks", tarea.taskId), { rachaActual: 0 })
                     tarea.rachaActual = 0
+                    tarea.rachaCiclo = 0
+                    tarea.cantidadCiclos = 0
                 }
             }
         }
