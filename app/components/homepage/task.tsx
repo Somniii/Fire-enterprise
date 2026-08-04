@@ -297,7 +297,7 @@ export default function Task({task , onToggleCompletada}:Props){
                                     task.tipoRepeticion === "week"
                                         ? "h-[5rem]"
                                         : task.tipoRepeticion === "month"
-                                        ? "h-[12rem]"
+                                        ? "h-[12.5rem]"
                                         : "h-[3rem]"
                                 }
                             `}

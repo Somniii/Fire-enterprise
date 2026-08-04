@@ -191,7 +191,7 @@ export default function CreateTask({ onTareaCreada }: { onTareaCreada: () => voi
         return(
             <>
             {/*Este div controla todo */}
-            <div className={`bg-white w-full ml-[1rem] mt-[1.5rem] rounded-xl p-6 flex gap-6 ${repeatType==="week" ? "h-[26rem] " :  repeatType==="month" ? "h-[26rem]" : "h-[17rem] " }`}>
+            <div className={`bg-white w-full ml-[1rem] mt-[1.5rem] rounded-xl p-6 flex gap-6 ${repeatType==="week" ? "h-[26rem] " :  repeatType==="month" ? "h-[29rem]" : "h-[17rem] " }`}>
 
                 {/*Columna izquierda: formulario */}
                 <form onSubmit={handleSubmit} className="flex flex-col gap-5 flex-1 min-w-0">
