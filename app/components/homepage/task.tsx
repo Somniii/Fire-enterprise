@@ -83,6 +83,7 @@ export default function Task({task}:Props){
 
         //Si estamos a domingo (domigno es 0) y la racha ciclo es mayor a 0(osea si hizo algo de racha) entonces la racha ciclo se pone en 0
         //RESETEO SEMANAL
+        /*
         if(task.tipoRepeticion === "week" && indiceHoy===0 && rachaCiclo >0){
             setRachaCiclo(0)
             //modificarTarea(task.taskId,{rachaCiclo:0})
@@ -92,7 +93,7 @@ export default function Task({task}:Props){
             setRachaCiclo(0)
             //modificarTarea(task.taskId,{rachaCiclo:0})
         }
-
+        */
         if(task.tipoRepeticion!=="" && task.activa===true){
             if(!task.completadaHoy){
 
@@ -118,6 +119,7 @@ export default function Task({task}:Props){
         }
     },[task.taskId, task.tipoRepeticion, task.activa, task.completadaHoy, task.diasSemana, rachaCiclo, task.cantidadDias, rachaActual])
     //se desarmo task en propiedades asi no se manda siempre el cmabio a la firebase y evitas que useeffect se dispare por cualquier minimo cambio
+    
     function verificarDiaYaPuesto(): boolean {
         if(task.ultimaCompletacion == null) return false
 
@@ -175,14 +177,13 @@ export default function Task({task}:Props){
         }
 
     }
-    useEffect(()=>{
-        if(task.rachaCiclo>task.cantidadDias){
-            const fuegoAzul = task.rachaCiclo - task.cantidadDias
-            setDiasExtras(fuegoAzul)
-        }else{
+    useEffect(() => {
+        if (rachaCiclo > task.cantidadDias) {
+            setDiasExtras(rachaCiclo - task.cantidadDias)
+        } else {
             setDiasExtras(0)
         }
-    },[task.rachaActual])
+    }, [rachaCiclo])  // ← ahora sí reacciona al state
     const cantidadDiasMeta = task.cantidadDias??0
     const fuegoGrisFaltantes = Math.max(0,cantidadDiasMeta - rachaCiclo)
     const fuegoAzul = task.rachaCiclo - task.cantidadDias

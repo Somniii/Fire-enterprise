@@ -48,11 +48,20 @@ export default function ChangeTask({ task, onGuardado }: Props) {
             tipoRepeticion,
             cantidadDias: cantidadMeta,
             ...(tipoRepeticion === "week" && {
-                detallesSemanal: { dias: diasSemana, cantidadDias: cantidadMeta },
+                detallesSemanal: {
+                    dias: diasSemana,
+                    cantidadDias: cantidadMeta,
+                    finSemana: task.detallesSemanal?.finSemana ?? null,
+                },
             }),
             ...(tipoRepeticion === "month" && {
-                detallesMensual: { fechas: diasMes, cantidadDias: cantidadMeta },
+                detallesMensual: {
+                    fechas: diasMes,
+                    cantidadDias: cantidadMeta,
+                    finMes: task.detallesMensual?.finMes ?? null,
+                },
             }),
+
         }
         await modificarTarea(task.taskId, updates)
         setGuardando(false)

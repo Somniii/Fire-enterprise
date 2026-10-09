@@ -45,7 +45,7 @@ export default function CalendarView({ fechas }: Props) {
 
                     return (
                         <div
-                            key={day.toISOString()}
+                            key={day.toISOString()} 
                             className={`
                                 flex h-5 w-5 items-center justify-center rounded text-[10px]
                                 ${

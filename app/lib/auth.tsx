@@ -190,7 +190,54 @@ export const obtenerTareas = async (): Promise<TaskInterface[]> => {
         }
 
         // 3. RESET ciclo mensual
+        if (tarea.tipoRepeticion === "month") {
+            if (
+                tarea.detallesMensual?.finMes &&
+                hoy > new Date(tarea.detallesMensual.finMes)
+            ) {
+                if (tarea.cantidadCiclos === 0) {
+                    tarea.cantidadCiclos = (tarea.cantidadCiclos ?? 0) + 1
+                    tarea.fechaCiclo = hoy.toISOString()
+                    tarea.rachaCiclo = 0
+                    tarea.detallesMensual.finMes = getProximoDia1(new Date(tarea.detallesMensual.finMes))
 
+                    await updateDoc(doc(db, "tasks", tarea.taskId), {
+                        cantidadCiclos: tarea.cantidadCiclos,
+                        fechaCiclo: tarea.fechaCiclo,
+                        rachaCiclo: 0,
+                        detallesMensual: tarea.detallesMensual
+                    })
+                } else {
+                    if (tarea.rachaCiclo >= tarea.cantidadDias) {
+                        tarea.cantidadCiclos = (tarea.cantidadCiclos ?? 0) + 1
+                        tarea.fechaCiclo = hoy.toISOString()
+                        tarea.rachaCiclo = 0
+                        tarea.detallesMensual.finMes = getProximoDia1(new Date(tarea.detallesMensual.finMes))
+
+                        await updateDoc(doc(db, "tasks", tarea.taskId), {
+                            cantidadCiclos: tarea.cantidadCiclos,
+                            fechaCiclo: tarea.fechaCiclo,
+                            rachaCiclo: 0,
+                            detallesMensual: tarea.detallesMensual
+                        })
+                    } else {
+                        tarea.cantidadCiclos = (tarea.cantidadCiclos ?? 0) + 1
+                        tarea.fechaCiclo = hoy.toISOString()
+                        tarea.rachaCiclo = 0
+                        tarea.rachaActual = 0
+                        tarea.detallesMensual.finMes = getProximoDia1(new Date(tarea.detallesMensual.finMes))
+
+                        await updateDoc(doc(db, "tasks", tarea.taskId), {
+                            cantidadCiclos: tarea.cantidadCiclos,
+                            fechaCiclo: tarea.fechaCiclo,
+                            rachaCiclo: 0,
+                            rachaActual: 0,
+                            detallesMensual: tarea.detallesMensual
+                        })
+                    }
+                }
+            }
+        }
 
         // 4. RACHA A 0 si no puede completar el ciclo (solo desde el segundo ciclo)
         if ((tarea.cantidadCiclos ?? 0) > 0 && !tarea.completadaHoy) {
